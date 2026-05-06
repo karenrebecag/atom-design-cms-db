@@ -1,8 +1,10 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+const ALLOWED_ORIGIN = "https://brand.atomchat.io";
+
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
@@ -46,6 +48,10 @@ Deno.serve(async (req) => {
       { table: "docs_blocks_card_grid", type: "cardGrid" },
       { table: "docs_blocks_table", type: "table" },
       { table: "docs_blocks_divider", type: "divider" },
+      { table: "docs_blocks_color_swatch", type: "colorSwatch" },
+      { table: "docs_blocks_dos_donts", type: "dosDonts" },
+      { table: "docs_blocks_download_button", type: "downloadButton" },
+      { table: "docs_blocks_contact_card", type: "contactCard" },
     ];
 
     const blocks: Record<string, unknown>[] = [];
@@ -61,6 +67,18 @@ Deno.serve(async (req) => {
         for (const block of data) {
           blocks.push({ ...block, blockType: type });
         }
+      }
+    }
+
+    // Hydrate sub-items for dosDonts blocks
+    for (const block of blocks) {
+      if (block.blockType === "dosDonts") {
+        const [dosRes, dontsRes] = await Promise.all([
+          supabase.from("docs_blocks_dos_donts_dos").select("*").eq("_parent_id", block.id).order("_order"),
+          supabase.from("docs_blocks_dos_donts_donts").select("*").eq("_parent_id", block.id).order("_order"),
+        ]);
+        block.dos = dosRes.data ?? [];
+        block.donts = dontsRes.data ?? [];
       }
     }
 
