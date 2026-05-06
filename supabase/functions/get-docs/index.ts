@@ -90,7 +90,8 @@ Deno.serve(async (req) => {
         for (const block of imageBlocks) {
           const media = mediaById[String(block.image_id)];
           if (media) {
-            block.image_url = media.url;
+            const rawUrl = media.url as string | undefined;
+            block.image_url = rawUrl?.startsWith("http") ? rawUrl : `${cmsUrl}${rawUrl}`;
             block.image_alt = media.alt;
             block.image_width = media.width;
             block.image_height = media.height;
