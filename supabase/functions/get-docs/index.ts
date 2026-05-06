@@ -70,6 +70,29 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Hydrate imageBlock blocks with media URL
+    const imageBlocks = blocks.filter((b) => b.blockType === "imageBlock" && b.image_id);
+    if (imageBlocks.length > 0) {
+      const imageIds = imageBlocks.map((b) => b.image_id as string);
+      const { data: mediaRows } = await supabase
+        .from("media")
+        .select("id, url, alt, width, height")
+        .in("id", imageIds);
+
+      if (mediaRows) {
+        const mediaById = Object.fromEntries(mediaRows.map((m) => [m.id, m]));
+        for (const block of imageBlocks) {
+          const media = mediaById[block.image_id as string];
+          if (media) {
+            block.image_url = media.url;
+            block.image_alt = media.alt;
+            block.image_width = media.width;
+            block.image_height = media.height;
+          }
+        }
+      }
+    }
+
     // Hydrate sub-items for dosDonts blocks
     for (const block of blocks) {
       if (block.blockType === "dosDonts") {
