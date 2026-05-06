@@ -70,19 +70,25 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Hydrate imageBlock blocks with media URL
+    // Hydrate imageBlock blocks with media URL via Payload API (returns Vercel Blob URLs)
     const imageBlocks = blocks.filter((b) => b.blockType === "imageBlock" && b.image_id);
     if (imageBlocks.length > 0) {
+      const cmsUrl = Deno.env.get("CMS_URL") ?? "https://brand-admin.atomchat.io";
       const imageIds = imageBlocks.map((b) => b.image_id as string);
-      const { data: mediaRows } = await supabase
-        .from("media")
-        .select("id, url, alt, width, height")
-        .in("id", imageIds);
+      const idsParam = imageIds.join(",");
 
-      if (mediaRows) {
-        const mediaById = Object.fromEntries(mediaRows.map((m) => [m.id, m]));
+      try {
+        const res = await fetch(
+          `${cmsUrl}/api/media?where[id][in]=${idsParam}&limit=${imageIds.length}&depth=0`,
+        );
+        const json = await res.json();
+        const mediaById: Record<string, Record<string, unknown>> = {};
+        for (const m of json.docs ?? []) {
+          mediaById[String(m.id)] = m;
+        }
+
         for (const block of imageBlocks) {
-          const media = mediaById[block.image_id as string];
+          const media = mediaById[String(block.image_id)];
           if (media) {
             block.image_url = media.url;
             block.image_alt = media.alt;
@@ -90,6 +96,8 @@ Deno.serve(async (req) => {
             block.image_height = media.height;
           }
         }
+      } catch (_err) {
+        // Non-fatal: images will be missing but doc still renders
       }
     }
 
