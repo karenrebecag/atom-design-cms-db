@@ -70,8 +70,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Hydrate imageBlock blocks with media URL via Payload API (returns Vercel Blob URLs)
-    const imageBlocks = blocks.filter((b) => b.blockType === "imageBlock" && b.image_id);
+    // Hydrate imageBlock and contactCard blocks with media URLs via Payload API
+    const imageBlocks = blocks.filter(
+      (b) => (b.blockType === "imageBlock" || b.blockType === "contactCard") && b.image_id,
+    );
     if (imageBlocks.length > 0) {
       const cmsUrl = Deno.env.get("CMS_URL") ?? "https://brand-admin.atomchat.io";
       const imageIds = imageBlocks.map((b) => b.image_id as string);
