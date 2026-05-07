@@ -104,6 +104,18 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Hydrate sub-items for steps blocks
+    for (const block of blocks) {
+      if (block.blockType === "steps") {
+        const { data: stepsData } = await supabase
+          .from("docs_blocks_steps_steps")
+          .select("*")
+          .eq("_parent_id", block.id)
+          .order("_order");
+        block.steps = stepsData ?? [];
+      }
+    }
+
     // Hydrate sub-items for dosDonts blocks
     for (const block of blocks) {
       if (block.blockType === "dosDonts") {
