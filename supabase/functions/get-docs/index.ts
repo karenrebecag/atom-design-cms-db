@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
       { table: "docs_blocks_dos_donts", type: "dosDonts" },
       { table: "docs_blocks_download_button", type: "downloadButton" },
       { table: "docs_blocks_contact_card", type: "contactCard" },
+      { table: "docs_blocks_nav_link", type: "navLink" },
     ];
 
     const blocks: Record<string, unknown>[] = [];
