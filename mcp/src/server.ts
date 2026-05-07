@@ -1,5 +1,4 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -12,7 +11,7 @@ import {
   getNavigationSchema,
 } from './tools/get-navigation.js';
 
-export function createServer() {
+export function createServer(): Server {
   const server = new Server(
     { name: '@atomchat.io/mcp-docs', version: '1.0.0' },
     { capabilities: { tools: {} } },
@@ -67,10 +66,5 @@ export function createServer() {
     }
   });
 
-  return {
-    async start() {
-      const transport = new StdioServerTransport();
-      await server.connect(transport);
-    },
-  };
+  return server;
 }
