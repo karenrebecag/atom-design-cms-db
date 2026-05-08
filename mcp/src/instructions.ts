@@ -228,8 +228,8 @@ Reglas: Alineacion izquierda para textos largos. Centrado solo en titulares cort
 ### Logotipo
 
 **Assets oficiales (UNICA fuente autorizada):**
-- Fondo oscuro: https://pub-c8d801a0ff204d758910633021fa302b.r2.dev/ATOM-horizontal-dark.svg (logo blanco)
-- Fondo claro: https://pub-c8d801a0ff204d758910633021fa302b.r2.dev/ATOM-horizontal-light.svg (logo oscuro)
+- Fondo oscuro: https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-dark.svg (logo blanco)
+- Fondo claro: https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-light.svg (logo oscuro)
 
 PROHIBIDO: No buscar logos en Google Drive, Logo Pack, brand-admin.atomchat.io/api/media, ni reconstruir el logo tipograficamente. Usar UNICAMENTE las URLs de Cloudflare R2 de arriba. Son los SVG oficiales y siempre estan disponibles.
 
