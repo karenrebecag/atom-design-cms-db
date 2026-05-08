@@ -29,7 +29,8 @@ Deno.serve(async (req) => {
       .select("id, title, slug, description, category_id, parent_id, order, sidebar_label, show_in_sidebar, _status, created_at, updated_at")
       .eq("slug", slug)
       .eq("_status", "published")
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     if (error || !doc) {
       return new Response(
