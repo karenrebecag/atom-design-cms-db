@@ -391,6 +391,53 @@ Usa este flujo SOLO si:
 
 ---
 
+## Componentes UI — atom-tag (pills)
+
+Tags/pills para categorizar, etiquetar y comunicar estados. Componente central del design system.
+
+### Variantes
+
+- **Filled** — fondo solido con texto de alto contraste. Uso principal
+- **Ghost** — fondo transparente, solo texto coloreado. Para contextos sutiles
+- **Outlined** — borde coloreado, fondo transparente. Para enfasis medio
+
+### Tamanos
+
+| Tamano | Font size | Line height | Padding horizontal |
+|--------|-----------|-------------|-------------------|
+| xs | 8px | 16px | 8px |
+| s | 10px | 20px | 8px |
+| m | 12px | 24px | 8px |
+
+### Intents y colores (variante Filled)
+
+| Intent | Background | Text | CSS vars |
+|--------|-----------|------|----------|
+| **Success** | #ECFEF6 | #007A56 | `--tags-bg-success`, `--tags-fg-filled-success` |
+| **Warning** | #FEFCE8 | #A76000 | `--tags-bg-warning`, `--tags-fg-filled-warning` |
+| **Danger** | #FEF3F3 | #C10008 | `--tags-bg-danger`, `--tags-fg-filled-danger` |
+| **Info** | #EFF6FF | #1447E6 | `--tags-bg-info`, `--tags-fg-filled-info` |
+| **Neutral** | #F4F4F5 | #3F3F46 | `--tags-bg-neutral`, `--tags-fg-filled-neutral` |
+| **Brand** | #FFF4ED | #A44200 | `--tags-bg-brand`, `--tags-fg-filled-brand` |
+| **AI** | gradient(136deg, #EDE9FF, #FDE7F4) | #8200DA | `--bg-accent-ai-secondary/tertiary`, `--tags-fg-filled-ai` |
+| **Disabled** | #F4F4F5 | #A1A1AA | `--tags-bg-disabled`, `--tags-fg-filled-disabled` |
+
+### Specs comunes
+
+- `border-radius: 1000px` (full pill)
+- `font-family: Inter`
+- `font-weight: 500` (Medium)
+- `display: inline-flex; justify-content: center; align-items: center`
+- `gap: 4px` (entre dot/icon/avatar y label)
+
+### Features opcionales
+
+- **hasDots:** Dot indicador de 6px a la izquierda del label, mismo color que el texto
+- **hasAvatar:** Avatar circular de 12px (xs), 14px (s), 16px (m) a la izquierda
+- **hasIcon:** Icono de 12px (xs), 14px (s), 16px (m) a la izquierda
+
+---
+
 ## Templates de publicacion
 
 ### Post de producto (feed)
