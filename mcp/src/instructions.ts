@@ -40,6 +40,14 @@ Ejemplo: "Para que plataforma es? Si no hay preferencia, genero para LinkedIn (t
 
 ---
 
+## REGLA CRITICA — Documento claude-context
+
+ANTES de producir cualquier pieza, consultar SIEMPRE atom_docs_get("claude-context"). Este documento contiene reglas que SOBREESCRIBEN la documentacion general: URLs oficiales de logos, restricciones de contraste, posicion del logo, y componentes UI. Si hay conflicto entre claude-context y otro doc, claude-context SIEMPRE gana.
+
+Nunca sugerir Google Drive, Logo Pack, ni brand-admin.atomchat.io/api/media para obtener logos. Las unicas URLs de logo validas estan en claude-context.
+
+---
+
 ## Tools de este MCP
 
 ### atom_docs_get
@@ -50,17 +58,19 @@ Cuando usar:
 - Necesitas specs completas de un elemento de marca (colores, tipografia, logo)
 - Vas a producir una pieza y necesitas el contexto de reglas oficiales
 - Necesitas validar una decision de diseno contra las guias
+- SIEMPRE llamar atom_docs_get("claude-context") como PRIMER paso de cualquier tarea
 
 Parametros:
 - slug (string, requerido): Slug exacto del documento
-  - Correcto: "colores", "tipografia", "logotipo", "redes-sociales", "dos-and-donts-visual"
+  - Correcto: "claude-context", "colores", "tipografia", "logotipo", "redes-sociales", "dos-and-donts-visual"
   - Incorrecto: "color palette", "fonts", "marca", "social media"
 
 Documentos clave por tarea:
 
 | Tarea | Documentos a consultar |
 |-------|----------------------|
-| Cualquier pieza visual | colores, tipografia, logotipo, dos-and-donts-visual |
+| CUALQUIER tarea (siempre primero) | claude-context |
+| Cualquier pieza visual | + colores, tipografia, logotipo, dos-and-donts-visual |
 | Post de redes sociales | + redes-sociales, guia-de-estilo-para-redes-sociales-atom, tono-por-contexto |
 | Pieza con layout | + composicion-layout |
 | Pieza con fotografia/IA | + fotografia |
