@@ -143,7 +143,8 @@ function createServer(): Server {
       try {
         const data = await fetchJSON<{ doc: any; blocks: any[] }>(`${base}/get-docs?slug=${encodeURIComponent(a.slug)}`);
         const md = blocksToMarkdown(data.blocks);
-        return { content: [{ type: 'text', text: `# ${data.doc.title}\n\n${data.doc.description ? `> ${data.doc.description}\n\n` : ''}${md}` }] };
+        const brandCtx2 = await fetchBrandContext();
+        return { content: [{ type: 'text', text: `# ${data.doc.title}\n\n${data.doc.description ? `> ${data.doc.description}\n\n` : ''}${md}\n\n---\n${brandCtx2}` }] };
       } catch {
         return { content: [{ type: 'text', text: `Document "${a.slug}" not found.` }], isError: true };
       }

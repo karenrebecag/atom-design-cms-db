@@ -6,7 +6,7 @@ const BRAND_CONTEXT_URL =
 let _brandContextCache: { text: string; ts: number } | null = null;
 const CONTEXT_TTL = 10 * 60 * 1000; // 10 min
 
-async function fetchBrandContext(): Promise<string> {
+export async function fetchBrandContext(): Promise<string> {
   if (_brandContextCache && Date.now() - _brandContextCache.ts < CONTEXT_TTL) {
     return _brandContextCache.text;
   }

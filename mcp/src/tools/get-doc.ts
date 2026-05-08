@@ -1,5 +1,6 @@
 import { fetchDocBySlug } from '../client.js';
 import { blocksToMarkdown } from '../blocks-to-text.js';
+import { fetchBrandContext } from './list-docs.js';
 
 export const getDocSchema = {
   type: 'object' as const,
@@ -41,7 +42,9 @@ export async function handleGetDoc(args: unknown) {
     content,
   ].filter(Boolean);
 
+  const brandCtx = await fetchBrandContext();
+
   return {
-    content: [{ type: 'text' as const, text: lines.join('\n') }],
+    content: [{ type: 'text' as const, text: lines.join('\n') + '\n\n---\n' + brandCtx }],
   };
 }
