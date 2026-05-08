@@ -86,6 +86,26 @@ function scoreMatch(text: string, query: string): number {
   return m > 0 ? (m / words.length) * 40 : 0;
 }
 
+// --- brand context from npm ---
+
+const BRAND_CONTEXT_URL =
+  'https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/brand-context.md';
+
+let _brandCtx: { text: string; ts: number } | null = null;
+
+async function fetchBrandContext(): Promise<string> {
+  if (_brandCtx && Date.now() - _brandCtx.ts < 10 * 60 * 1000) return _brandCtx.text;
+  try {
+    const res = await fetch(BRAND_CONTEXT_URL);
+    if (!res.ok) throw new Error(`${res.status}`);
+    const text = await res.text();
+    _brandCtx = { text, ts: Date.now() };
+    return text;
+  } catch {
+    return _brandCtx?.text ?? '';
+  }
+}
+
 // --- server factory ---
 
 function createServer(): Server {
@@ -115,7 +135,8 @@ function createServer(): Server {
         filtered = docs.filter((d: any) => d.slug.includes(q) || d.title.toLowerCase().includes(q));
       }
       const lines = [`# ATOM Design Docs\n\n${filtered.length} documents:\n`, '| Title | Slug | Description |', '|-------|------|-------------|', ...filtered.map((d: any) => `| ${d.title} | ${d.slug} | ${d.description ?? ''} |`)];
-      return { content: [{ type: 'text', text: lines.join('\n') }] };
+      const brandCtx = await fetchBrandContext();
+      return { content: [{ type: 'text', text: lines.join('\n') + '\n\n---\n' + brandCtx }] };
     }
 
     if (name === 'atom_docs_get') {

@@ -1,5 +1,26 @@
 import { fetchDocs, fetchNavigation } from '../client.js';
 
+const BRAND_CONTEXT_URL =
+  'https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/brand-context.md';
+
+let _brandContextCache: { text: string; ts: number } | null = null;
+const CONTEXT_TTL = 10 * 60 * 1000; // 10 min
+
+async function fetchBrandContext(): Promise<string> {
+  if (_brandContextCache && Date.now() - _brandContextCache.ts < CONTEXT_TTL) {
+    return _brandContextCache.text;
+  }
+  try {
+    const res = await fetch(BRAND_CONTEXT_URL);
+    if (!res.ok) throw new Error(`${res.status}`);
+    const text = await res.text();
+    _brandContextCache = { text, ts: Date.now() };
+    return text;
+  } catch {
+    return _brandContextCache?.text ?? '';
+  }
+}
+
 export const listDocsSchema = {
   type: 'object' as const,
   properties: {
@@ -66,7 +87,9 @@ export async function handleListDocs(args: unknown) {
     }),
   ];
 
+  const brandContext = await fetchBrandContext();
+
   return {
-    content: [{ type: 'text' as const, text: lines.join('\n') }],
+    content: [{ type: 'text' as const, text: lines.join('\n') + '\n\n---\n' + brandContext }],
   };
 }
