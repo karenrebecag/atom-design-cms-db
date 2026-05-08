@@ -130,6 +130,40 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Hydrate sub-items for table blocks (headers + rows with cells)
+    for (const block of blocks) {
+      if (block.blockType === "table") {
+        const [headersRes, rowsRes] = await Promise.all([
+          supabase.from("docs_blocks_table_headers").select("id, label, _order").eq("_parent_id", block.id).order("_order"),
+          supabase.from("docs_blocks_table_rows").select("id, _order").eq("_parent_id", block.id).order("_order"),
+        ]);
+        block.headers = headersRes.data ?? [];
+
+        const rows = rowsRes.data ?? [];
+        if (rows.length > 0) {
+          const rowIds = rows.map((r: Record<string, unknown>) => r.id as string);
+          const { data: cells } = await supabase
+            .from("docs_blocks_table_rows_cells")
+            .select("id, value, _order, _parent_id")
+            .in("_parent_id", rowIds)
+            .order("_order");
+
+          const cellsByRow: Record<string, { value: string; _order: number }[]> = {};
+          for (const cell of cells ?? []) {
+            const pid = cell._parent_id as string;
+            if (!cellsByRow[pid]) cellsByRow[pid] = [];
+            cellsByRow[pid].push({ value: cell.value as string, _order: cell._order as number });
+          }
+          block.rows = rows.map((r: Record<string, unknown>) => ({
+            _order: r._order,
+            cells: (cellsByRow[r.id as string] ?? []).sort((a, b) => a._order - b._order),
+          }));
+        } else {
+          block.rows = [];
+        }
+      }
+    }
+
     // Sort all blocks by _order
     blocks.sort((a, b) => (a._order as number) - (b._order as number));
 
