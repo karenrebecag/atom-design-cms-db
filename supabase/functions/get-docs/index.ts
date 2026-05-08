@@ -5,7 +5,8 @@ const ALLOWED_ORIGIN = "https://brand.atomchat.io";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-restricted-access",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
@@ -16,7 +17,7 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
   const url = new URL(req.url);
@@ -26,7 +27,7 @@ Deno.serve(async (req) => {
   if (slug) {
     const { data: doc, error } = await supabase
       .from("docs")
-      .select("id, title, slug, description, category_id, parent_id, order, sidebar_label, show_in_sidebar, _status, created_at, updated_at")
+      .select("id, title, slug, description, category_id, parent_id, order, sidebar_label, show_in_sidebar, restricted, _status, created_at, updated_at")
       .eq("slug", slug)
       .eq("_status", "published")
       .limit(1)
@@ -37,6 +38,18 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: "Doc not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+
+    // Restricted docs: require secret header to serve blocks
+    if (doc.restricted) {
+      const restrictedSecret = Deno.env.get("RESTRICTED_CONTENT_SECRET");
+      const providedSecret = req.headers.get("x-restricted-access");
+      if (!restrictedSecret || providedSecret !== restrictedSecret) {
+        return new Response(
+          JSON.stringify({ doc, blocks: [], restricted: true }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     // Fetch all block types for this doc
@@ -176,7 +189,7 @@ Deno.serve(async (req) => {
   // List all published docs
   const { data: docs, error } = await supabase
     .from("docs")
-    .select("id, title, slug, description, category_id, parent_id, order, sidebar_label, show_in_sidebar, _status")
+    .select("id, title, slug, description, category_id, parent_id, order, sidebar_label, show_in_sidebar, restricted, _status")
     .eq("_status", "published")
     .order("order");
 

@@ -28,6 +28,7 @@ interface DocEntry {
   parent_id: number | null;
   order: number;
   show_in_sidebar: boolean;
+  restricted: boolean;
 }
 
 interface NavNode {
@@ -36,6 +37,7 @@ interface NavNode {
   icon?: string;
   type: "folder" | "page";
   url?: string;
+  restricted?: boolean;
   children?: NavNode[];
 }
 
@@ -57,6 +59,7 @@ function buildTree(categories: Category[], docs: DocEntry[]): NavNode[] {
         slug: d.slug,
         type: "page",
         url: `/docs/${cat.slug}/${d.slug}`,
+        restricted: d.restricted,
       }));
 
     const children: NavNode[] = [
@@ -93,7 +96,7 @@ Deno.serve(async (req) => {
       .order("order"),
     supabase
       .from("docs")
-      .select("id, title, slug, sidebar_label, category_id, parent_id, order, show_in_sidebar")
+      .select("id, title, slug, sidebar_label, category_id, parent_id, order, show_in_sidebar, restricted")
       .eq("_status", "published")
       .order("order"),
     supabase
