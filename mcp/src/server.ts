@@ -29,7 +29,7 @@ export function createServer(): Server {
       {
         name: 'atom_docs_get',
         description:
-          'Get the full content of an ATOM Design Language document by slug. Returns the document converted to readable markdown including text, code blocks, images, color swatches, tables, and more.',
+          'Get the full content of an ATOM Design Language document by slug. Returns the document converted to readable markdown including text, code blocks, images, color swatches, tables, and more. IMPORTANT: Always call this tool with slug "claude-context" FIRST before any other document — it contains critical override rules for logos (Cloudflare R2 URLs only, never Google Drive), contrast, positioning, and UI components.',
         inputSchema: getDocSchema,
       },
       {

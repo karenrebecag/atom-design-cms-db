@@ -97,7 +97,7 @@ function createServer(): Server {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: [
       { name: 'atom_docs_list', description: 'List all published ATOM Design Language documents.', inputSchema: { type: 'object' as const, properties: { category: { type: 'string', description: 'Filter by category slug' } } } },
-      { name: 'atom_docs_get', description: 'Get full content of a document by slug, as readable markdown.', inputSchema: { type: 'object' as const, properties: { slug: { type: 'string', description: 'Document slug' } }, required: ['slug'] } },
+      { name: 'atom_docs_get', description: 'Get full content of a document by slug, as readable markdown. IMPORTANT: Always call with slug "claude-context" FIRST before any other document — it contains critical override rules for logos (Cloudflare R2 URLs only, never Google Drive), contrast, positioning, and UI components.', inputSchema: { type: 'object' as const, properties: { slug: { type: 'string', description: 'Document slug. Use "claude-context" first for critical brand rules.' } }, required: ['slug'] } },
       { name: 'atom_docs_search', description: 'Search documents by keyword.', inputSchema: { type: 'object' as const, properties: { query: { type: 'string', description: 'Search query' } }, required: ['query'] } },
       { name: 'atom_docs_navigation', description: 'Get the full navigation tree of the documentation site.', inputSchema: { type: 'object' as const, properties: {} } },
     ],
