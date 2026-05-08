@@ -10,11 +10,12 @@ import {
   handleGetNavigation,
   getNavigationSchema,
 } from './tools/get-navigation.js';
+import { INSTRUCTIONS } from './instructions.js';
 
 export function createServer(): Server {
   const server = new Server(
     { name: '@atomchat.io/mcp-docs', version: '1.0.0' },
-    { capabilities: { tools: {} } },
+    { capabilities: { tools: {} }, instructions: INSTRUCTIONS },
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({

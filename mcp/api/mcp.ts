@@ -5,6 +5,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { IncomingMessage, ServerResponse } from 'http';
+import { INSTRUCTIONS } from '../src/instructions.js';
 
 // Inline the server setup to avoid path resolution issues in Vercel's bundler.
 // Tools fetch from Supabase edge functions at runtime.
@@ -90,7 +91,7 @@ function scoreMatch(text: string, query: string): number {
 function createServer(): Server {
   const server = new Server(
     { name: '@atomchat.io/mcp-docs', version: '1.0.0' },
-    { capabilities: { tools: {} } },
+    { capabilities: { tools: {} }, instructions: INSTRUCTIONS },
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
