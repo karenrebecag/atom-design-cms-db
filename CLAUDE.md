@@ -118,6 +118,67 @@ Ejemplo: "Para que plataforma es? Si no hay preferencia, genero para LinkedIn (t
 
 ---
 
+### Tool: `image_prompt_get` (Edge Function get-image-prompt)
+
+**Que hace:** Obtiene templates de prompts para generacion de imagenes con variables dinamicas. Los templates viven en Supabase (tabla `image_prompts`, protegida con RLS — solo service_role).
+
+**Endpoint:** `https://fejpujhqnlfjhfpqetgx.supabase.co/functions/v1/get-image-prompt`
+
+**Auth requerida:** Header `x-service-key` con el `RESTRICTED_CONTENT_SECRET`. Sin el, retorna 401.
+
+**Operaciones:**
+
+| Metodo | Params | Que hace |
+|--------|--------|----------|
+| `GET` | (ninguno) | Lista todos los prompts (metadata, sin template) |
+| `GET` | `?name=b2b-saas-marketing` | Devuelve template completo + variables con opciones |
+| `GET` | `?category=marketing` | Filtra prompts por categoria |
+| `POST` | `{ prompt_name, values }` | Rellena variables y devuelve prompt listo para usar |
+
+**Variables disponibles en `b2b-saas-marketing`:**
+
+| Variable | Requerida | Opciones |
+|----------|-----------|----------|
+| `subject` | Si | Libre — describe escena, accion, emocion |
+| `setting` | Si | `modern Mexican corporate office`, `car dealership showroom`, `home office with city view`, `corporate lobby`, `outdoor corporate campus with greenery` |
+| `character_outfit` | No | `men: navy or dark blazer + light dress shirt`, `women: navy blazer or blouse` |
+| `props` | No | `white iPhone showing a chat UI`, `desktop monitor with WhatsApp-style interface`, `orange mug or notebook`, `laptop on clean desk` |
+| `composition` | Si | `Vertical 9:16`, `Horizontal 16:9`, `Square 1:1` |
+| `subject_position` | No | `left`, `center`, `right` (default: `left`) |
+| `negative_space_side` | No | `left`, `right`, `top` (default: `right`) |
+| `emotional_tone` | Si | `overwhelmed and stressed`, `surprised with wide eyes`, `focused and confident`, `relieved and smiling`, `celebrating a win` |
+
+**Ejemplo de uso (POST):**
+```json
+{
+  "prompt_name": "b2b-saas-marketing",
+  "values": {
+    "subject": "A sales manager celebrating after closing a deal",
+    "setting": "modern Mexican corporate office",
+    "composition": "Vertical 9:16",
+    "emotional_tone": "celebrating a win",
+    "character_outfit": "women: navy blazer or blouse",
+    "props": "white iPhone showing a chat UI"
+  }
+}
+```
+→ Retorna el prompt completo con variables rellenadas, listo para pasar a image generation.
+
+**Cuando usar:**
+- Antes de generar cualquier imagen de marketing con AI
+- Para mantener consistencia visual entre piezas generadas
+- Variables no proporcionadas usan su default automaticamente
+
+**Cuando NO usar:**
+- Para prompts de diseno que no son fotograficos (usa Figma en su lugar)
+- Si necesitas un prompt completamente custom sin template
+
+**Errores comunes:**
+- No pasar `subject` o `emotional_tone` (son required, no tienen default)
+- Inventar opciones fuera de las listadas en `setting` o `emotional_tone`
+
+---
+
 ### Skill: `/social-media-image-sizes`
 
 **Que hace:** Verifica y redimensiona imagenes contra 60+ specs de 9 plataformas.
@@ -302,13 +363,13 @@ Usa este flujo SOLO si:
 
 ### Colores core
 
-| Color | HEX | RGB | CMYK | Uso |
-|-------|-----|-----|------|-----|
-| **Atom Orange** | #FF6600 | 255, 102, 0 | C0 M60 Y100 K0 | ADN de marca. Solo acento: highlights, la palabra "Atom", detalles. NUNCA fondos grandes ni CTAs |
-| **Violet** | #8023FF | 128, 35, 255 | C50 M86 Y0 K0 | IA y tecnologia. Color de apoyo |
-| **Gradiente** | #8023FF → #FF6600 | — | — | Elemento hero. Fondos de seccion, palabras clave. Proporciones controladas |
+| Color | HEX | RGB | Uso |
+|-------|-----|-----|-----|
+| **Atom Orange** | #FF6600 | 255, 102, 0 | ADN de marca. Solo acento: highlights en titulos, la palabra "Atom", detalles. NUNCA en fondos grandes ni botones CTA |
+| **Violet** | #8023FF | 128, 35, 255 | IA y tecnologia. Color de apoyo |
+| **Gradiente** | #8023FF → #FF6600 | — | Elemento hero. Fondos de seccion, palabras clave. Proporciones controladas |
 
-### Colores de texto
+### Colores de texto (nunca negro puro)
 
 | Uso | HEX | RGB |
 |-----|-----|-----|
@@ -465,7 +526,7 @@ Tags/pills para categorizar, etiquetar y comunicar estados. Componente central d
 
 ## Specs por plataforma
 
-### Instagram (canal activo de Atom)
+### Instagram (canales activos de Atom)
 
 | Formato | Tamano (px) | Aspect | Uso |
 |---------|-------------|--------|-----|
@@ -660,71 +721,109 @@ JPG/PNG max 30MB. Video max 5 min.
 
 ## Fotografia e imagenes IA
 
-**Estilo:** Realista, moderno, expresiones autenticas, escenarios por industria, iluminacion natural/cinematografica, interaccion con mobile y WhatsApp, composicion editorial (no stock generico).
+### Estilo visual
+- Fotografico realista y moderno
+- Expresiones humanas autenticas segun la intencion del mensaje
+- Escenarios coherentes con la industria comunicada
+- Iluminacion natural o cinematografica suave
+- Estetica limpia, moderna y aspiracional
+- Interaccion visible con dispositivos moviles y WhatsApp
+- Colores alineados con la paleta de marca
+- Composicion publicitaria/editorial — evitar apariencia de stock generico
 
-**Filtro testimoniales:** Contraste +5, temperatura +3.
+### Filtro de marca para testimoniales
+- Contraste: +5
+- Temperatura: +3
 
-**Prohibido:** Poses artificiales, estilos caricaturescos/futuristas, baja resolucion, capturas pixeladas.
-
-**Accesibilidad:** Contraste texto/fondo >= 4.5:1 (WCAG AA). Alt text y captions siempre. Overlays minimo 28-32px.
+### Restricciones
+- No poses artificiales ni expresiones poco naturales
+- No estilos caricaturescos, excesivamente futuristas o sobreeditados
+- No imagenes de baja resolucion ni capturas pixeladas
+- Contraste de texto sobre imagen: minimo 4.5:1 (WCAG AA)
 
 ---
 
-## Safe zones
+## Accesibilidad
+
+- Contraste de texto: ratio >= 4.5:1 contra el fondo (WCAG AA)
+- No depender solo de imagenes para informacion critica — incluir alt text y captions
+- Fuentes en overlays de Story/Reel: minimo 28-32px
+- Closed captions en todos los videos
+
+---
+
+## Safe zones por plataforma
 
 | Plataforma | Tipo | Safe zone |
 |-----------|------|-----------|
-| Instagram | Story/Reel | Centro 1080x1420 |
-| Facebook | Story | Evitar top 14%, bottom 20% |
-| Facebook | Cover | Centro 640x312 |
-| TikTok | Video | y: 150-1770 |
-| Snapchat | Snap/Ad | Centro 1080x1420 |
-| YouTube | Banner | Centro 1546x423 |
+| Instagram | Story/Reel | Centro 1080x1420 px |
+| Facebook | Story | Evitar top 14% y bottom 20% |
+| TikTok | Video | y: 150 - 1770 px |
+| Snapchat | Snap/Ad | Centro 1080x1420 px |
+| YouTube | Banner | Centro 1546x423 px |
+| Facebook | Cover | Centro 640x312 px |
 | X | Header | Evitar bottom-left 20% |
 
 ---
 
 ## Proceso de aprobacion
 
-Toda pieza de marca requiere aprobacion del equipo de Marketing antes de publicar. Consulta `atom_docs_get("proceso-aprobacion")` para flujo, responsables y tiempos.
+Toda pieza de marca debe pasar por aprobacion del equipo de Marketing antes de publicarse. Consultar `atom_docs_get("proceso-aprobacion")` para flujo completo, responsables y tiempos de respuesta.
 
 ---
 
 ## Base de datos y backend
 
-PostgreSQL para la plataforma de documentacion ATOM Design. Managed via Supabase CLI. Schema auto-generado por Payload CMS (Drizzle ORM).
+PostgreSQL database for the ATOM Design visual language documentation platform.
+Managed via Supabase CLI. Schema is auto-generated by Payload CMS (Drizzle ORM).
 
 ### Remote
 
 - **Project:** Atom Design (fejpujhqnlfjhfpqetgx)
 - **Region:** us-west-2
+- **Org:** Atom Design (free tier)
 - **Host:** db.fejpujhqnlfjhfpqetgx.supabase.co
 - **Pooler:** aws-1-us-west-2.pooler.supabase.com:5432
 
 ### Local
 
-- **DB:** postgresql://postgres:postgres@127.0.0.1:54332/postgres
+- **DB port:** 54332
+- **API port:** 54331
 - **Studio:** http://127.0.0.1:54333
+- **Connection:** postgresql://postgres:postgres@127.0.0.1:54332/postgres
 
-### DB workflow
+### Working with the DB
 
-- **Siempre local primero** — nunca aplicar cambios directos a remote via MCP
-- `supabase start` → `supabase migration new <name>` → `supabase db reset` → `supabase db push`
-- `supabase db pull` para sincronizar cambios remotos
+- **Always work locally first** — never apply changes directly to remote via MCP
+- Use `supabase start` to run local instance (requires Docker)
+- Use `supabase migration new <name>` to create migrations
+- Use `supabase db reset` to test migrations locally
+- Use `supabase db push` to apply to remote after local validation
+- Use `supabase db pull` to sync remote schema changes to local
 
-### Schema ownership (Payload CMS)
+### Schema ownership
 
-**NO:** renombrar columnas/tablas, cambiar tipos de datos, eliminar constraints de Payload.
-**SI:** RLS policies, comments, edge functions, indexes, views.
+Payload CMS (Drizzle ORM) owns the schema. Do NOT:
+- Rename columns or tables
+- Change data types
+- Drop Payload-managed constraints
 
-### Puertos
+You CAN safely:
+- Enable RLS and create policies
+- Add comments
+- Create edge functions
+- Add supplementary indexes
+- Create views
 
-| Servicio | Puerto |
-|----------|--------|
-| API | 54331 |
-| DB | 54332 |
-| Studio | 54333 |
-| Inbucket | 54334 |
-| Analytics | 54337 |
-| Shadow DB | 54330 |
-| Pooler | 54339 |
+### Ports (offset +10 from defaults to avoid conflicts)
+
+| Service    | Port  |
+|------------|-------|
+| API        | 54331 |
+| DB         | 54332 |
+| Studio     | 54333 |
+| Inbucket   | 54334 |
+| Analytics  | 54337 |
+| Shadow DB  | 54330 |
+| Pooler     | 54339 |
+| Inspector  | 8093  |
