@@ -4,10 +4,10 @@ const SERVICE_KEY = process.env.RESTRICTED_CONTENT_SECRET;
 export const getImagePromptSchema = {
   type: 'object' as const,
   properties: {
-    prompt_name: {
+    use_case: {
       type: 'string',
       description:
-        'Name of the image prompt template (e.g. "b2b-saas-marketing"). Use atom_image_prompt_list to see available prompts.',
+        'What the image is for (e.g. "linkedin-post", "hero-image", "instagram-post", "banner-marketing"). The tool finds the best template automatically.',
     },
     values: {
       type: 'object',
@@ -16,7 +16,7 @@ export const getImagePromptSchema = {
       additionalProperties: { type: 'string' },
     },
   },
-  required: ['prompt_name', 'values'],
+  required: ['use_case', 'values'],
 };
 
 export const listImagePromptsSchema = {
@@ -59,13 +59,34 @@ async function fetchImagePromptAPI(
 }
 
 export async function handleGetImagePrompt(args: unknown) {
-  const { prompt_name, values } = args as {
-    prompt_name: string;
+  const { use_case, values } = args as {
+    use_case: string;
     values: Record<string, string>;
   };
 
+  // Step 1: Find template by use case (lightweight, no full template loaded)
+  const matchData = await fetchImagePromptAPI(
+    `?use_case=${encodeURIComponent(use_case)}`,
+  );
+
+  const matches = matchData.matches as { name: string }[];
+  if (!matches || matches.length === 0) {
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: `No template found for use case "${use_case}". Use atom_image_prompt_list to see available use cases.`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
+  const templateName = matches[0].name;
+
+  // Step 2: Fill template with values (only now loads the full template)
   const data = await fetchImagePromptAPI('', 'POST', {
-    prompt_name,
+    prompt_name: templateName,
     values,
   });
 
@@ -73,7 +94,7 @@ export async function handleGetImagePrompt(args: unknown) {
     content: [
       {
         type: 'text' as const,
-        text: `# Generated Image Prompt\n\nTemplate: ${prompt_name}\n\n---\n\n${data.prompt}`,
+        text: `# Generated Image Prompt\n\nTemplate: ${templateName} (matched use case: ${use_case})\n\n---\n\n${data.prompt}`,
       },
     ],
   };
@@ -87,21 +108,18 @@ export async function handleListImagePrompts(args: unknown) {
   const prompts = data.prompts as {
     name: string;
     category: string;
-    variables: Record<string, { description: string; options?: string[]; required?: boolean; default?: string }>;
+    use_cases: string[];
   }[];
 
-  const lines = prompts.map((p) => {
-    const vars = Object.entries(p.variables)
-      .map(([k, v]) => `  - \`${k}\`${v.required ? ' (required)' : ''}: ${v.description}${v.options ? ` [${v.options.join(', ')}]` : ''}${v.default ? ` (default: ${v.default})` : ''}`)
-      .join('\n');
-    return `### ${p.name}\nCategory: ${p.category}\n\nVariables:\n${vars}`;
-  });
+  const lines = prompts.map((p) =>
+    `- **${p.name}** (${p.category}): ${p.use_cases.join(', ')}`,
+  );
 
   return {
     content: [
       {
         type: 'text' as const,
-        text: `# Available Image Prompts\n\n${lines.join('\n\n---\n\n')}`,
+        text: `# Available Image Prompt Templates\n\n${lines.join('\n')}\n\nUse \`atom_image_prompt\` with any use case above to generate a prompt.`,
       },
     ],
   };

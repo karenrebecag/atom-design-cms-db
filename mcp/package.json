@@ -1,6 +1,6 @@
 {
   "name": "@atomchat.io/mcp-docs",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "MCP server for ATOM Design Language documentation — gives AI context about brand guidelines, visual language, and editorial content",
   "type": "module",
   "bin": {

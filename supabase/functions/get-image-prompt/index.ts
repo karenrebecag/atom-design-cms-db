@@ -65,10 +65,31 @@ Deno.serve(async (req) => {
     );
   }
 
-  // GET by name: returns single prompt with template + variables
+  // GET: by name, use_case, or list
   const url = new URL(req.url);
   const name = url.searchParams.get("name");
+  const useCase = url.searchParams.get("use_case");
   const category = url.searchParams.get("category");
+
+  // Match by use_case — lightweight lookup, returns name + use_cases only
+  if (useCase) {
+    const { data, error } = await supabase
+      .from("image_prompts")
+      .select("name, category, use_cases")
+      .contains("use_cases", [useCase]);
+
+    if (error || !data || data.length === 0) {
+      return new Response(
+        JSON.stringify({ error: `No prompt found for use case "${useCase}"`, available_use_cases: "Use GET without params to list all" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ matches: data }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
 
   if (name) {
     const { data, error } = await supabase
@@ -93,7 +114,7 @@ Deno.serve(async (req) => {
   // LIST: all prompts or filtered by category
   const query = supabase
     .from("image_prompts")
-    .select("id, name, category, variables, created_at")
+    .select("id, name, category, use_cases, created_at")
     .order("category");
 
   if (category) {
