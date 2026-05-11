@@ -10,6 +10,12 @@ import {
   handleGetNavigation,
   getNavigationSchema,
 } from './tools/get-navigation.js';
+import {
+  handleGetImagePrompt,
+  getImagePromptSchema,
+  handleListImagePrompts,
+  listImagePromptsSchema,
+} from './tools/get-image-prompt.js';
 import { INSTRUCTIONS } from './instructions.js';
 
 export function createServer(): Server {
@@ -44,6 +50,18 @@ export function createServer(): Server {
           'Get the full navigation tree of the ATOM Design Language documentation site. Shows all categories and documents organized hierarchically.',
         inputSchema: getNavigationSchema,
       },
+      {
+        name: 'atom_image_prompt',
+        description:
+          'Generate a complete image prompt by filling a brand-consistent template with provided values. Use this BEFORE generating any marketing image. Returns a ready-to-use photorealistic prompt with Atom brand constraints baked in.',
+        inputSchema: getImagePromptSchema,
+      },
+      {
+        name: 'atom_image_prompt_list',
+        description:
+          'List all available image prompt templates with their variables, options, and defaults. Use this to discover what templates exist and what values they accept.',
+        inputSchema: listImagePromptsSchema,
+      },
     ],
   }));
 
@@ -59,6 +77,10 @@ export function createServer(): Server {
         return handleSearchDocs(args);
       case 'atom_docs_navigation':
         return handleGetNavigation();
+      case 'atom_image_prompt':
+        return handleGetImagePrompt(args);
+      case 'atom_image_prompt_list':
+        return handleListImagePrompts(args);
       default:
         return {
           content: [{ type: 'text', text: `Unknown tool: ${name}` }],
