@@ -16,6 +16,10 @@ import {
   handleListImagePrompts,
   listImagePromptsSchema,
 } from './tools/get-image-prompt.js';
+import {
+  handleGenerateImage,
+  generateImageSchema,
+} from './tools/generate-image.js';
 import { INSTRUCTIONS } from './instructions.js';
 
 export function createServer(): Server {
@@ -62,6 +66,12 @@ export function createServer(): Server {
           'List all available image prompt templates with their variables, options, and defaults. Use this to discover what templates exist and what values they accept.',
         inputSchema: listImagePromptsSchema,
       },
+      {
+        name: 'atom_generate_image',
+        description:
+          'Generate a photorealistic image using Flux AI. Pass the prompt from atom_image_prompt. Returns an image URL to use as background-image in HTML/CSS. The image contains NO text and NO logos — those are added in the HTML layer.',
+        inputSchema: generateImageSchema,
+      },
     ],
   }));
 
@@ -81,6 +91,8 @@ export function createServer(): Server {
         return handleGetImagePrompt(args);
       case 'atom_image_prompt_list':
         return handleListImagePrompts(args);
+      case 'atom_generate_image':
+        return handleGenerateImage(args);
       default:
         return {
           content: [{ type: 'text', text: `Unknown tool: ${name}` }],
