@@ -3,11 +3,12 @@
   "buildCommand": "",
   "installCommand": "pnpm install",
   "functions": {
-    "api/mcp.ts": {
-      "maxDuration": 30
-    }
+    "api/mcp.ts": { "maxDuration": 30 },
+    "api/gpt-proxy.ts": { "maxDuration": 30 }
   },
   "rewrites": [
-    { "source": "/mcp", "destination": "/api/mcp" }
+    { "source": "/mcp", "destination": "/api/mcp" },
+    { "source": "/gpt/:path*", "destination": "/api/gpt-proxy" },
+    { "source": "/gpt", "destination": "/api/gpt-proxy" }
   ]
 }
