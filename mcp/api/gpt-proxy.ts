@@ -107,17 +107,34 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
 
     // POST /gpt/image-prompt — fill template
     if (path === 'image-prompt' && req.method === 'POST') {
+      // Parse body from raw stream if needed
       let body = req.body;
+      if (!body) {
+        const chunks: Buffer[] = [];
+        for await (const chunk of req) chunks.push(Buffer.from(chunk));
+        body = JSON.parse(Buffer.concat(chunks).toString());
+      }
       if (typeof body === 'string') body = JSON.parse(body);
-      if (!body?.prompt_name || !body?.values) {
+
+      // GPT may send values flat alongside prompt_name — restructure
+      if (body && !body.values && body.prompt_name) {
+        const { prompt_name, ...rest } = body;
+        body = { prompt_name, values: rest };
+      }
+
+      if (!body?.prompt_name) {
         return json(res, { error: 'need prompt_name and values' }, 400);
       }
+
       const r = await fetch(`${base}/get-image-prompt`, {
         method: 'POST',
         headers: { ...supaHeaders, 'x-service-key': SERVICE_KEY },
         body: JSON.stringify(body),
       });
-      if (!r.ok) return json(res, { error: 'fill failed' }, 500);
+      if (!r.ok) {
+        const errText = await r.text();
+        return json(res, { error: 'fill failed', detail: errText }, 500);
+      }
       return json(res, await r.json());
     }
 
