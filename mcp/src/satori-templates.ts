@@ -78,10 +78,11 @@ function pill(text: string, intent: string) {
       style: {
         display: 'flex',
         alignItems: 'center',
+        alignSelf: 'flex-start',
         gap: 6,
         padding: '6px 14px',
         borderRadius: 1000,
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: 500,
         backgroundColor: bg,
         color: fg,
@@ -226,6 +227,30 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                                 lineHeight: 1.5,
                               },
                               children: v.subheadline,
+                            },
+                          }
+                        : null,
+                      // CTA (optional)
+                      v.cta_text
+                        ? {
+                            type: 'div',
+                            props: {
+                              style: {
+                                display: 'flex',
+                                alignItems: 'center',
+                                alignSelf: 'flex-start',
+                                backgroundColor: COLORS.dark,
+                                color: COLORS.primaryFg,
+                                fontSize: 18,
+                                fontWeight: 600,
+                                paddingTop: 14,
+                                paddingBottom: 14,
+                                paddingLeft: 28,
+                                paddingRight: 28,
+                                borderRadius: 100,
+                                marginTop: 24,
+                              },
+                              children: v.cta_text,
                             },
                           }
                         : null,
