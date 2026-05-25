@@ -66,21 +66,20 @@ export function createServer(): Server {
         inputSchema: generateImageSchema,
       },
       {
-        name: 'atom_layout',
-        description:
-          'Render a brand-consistent HTML layout from a template. Returns complete HTML artifact (1080x1350, 4:5). Use after generating an image with atom_generate_image. Templates: case-study, photo-overlay-dark, event-hero, split-layout, editorial-light.',
-        inputSchema: layoutSchema,
-      },
-      {
         name: 'atom_layout_screenshot',
         description:
-          'Render a layout template directly to a PNG image. Returns the image inline — no HTML, no browser needed. Use this instead of atom_layout when the user needs a final image (social media post, banner). Flow: atom_generate_image (photo) → atom_layout_screenshot (template + photo → PNG).',
+          'Generate a final PNG image from a layout template. ALWAYS use this when the user asks for a social media post, banner, or any image. Returns the image inline as base64 PNG. Flow: 1) atom_generate_image → photo URL, 2) atom_layout_screenshot → PNG. Templates: case-study, photo-overlay-dark, stat-card, quote-card, stat-card-gradient.',
         inputSchema: screenshotSchema,
       },
       {
-        name: 'atom_layout_list',
+        name: 'atom_layout',
         description:
-          'List all available layout templates with their placeholders and descriptions. Call this to see what templates exist before using atom_layout.',
+          'DEBUG ONLY — returns raw HTML string of a layout template for inspection. Do NOT use for social media images. For any final image use atom_layout_screenshot instead.',
+        inputSchema: layoutSchema,
+      },
+      {
+        name: 'atom_layout_list',
+        description: 'List all layout templates with their fields and descriptions.',
         inputSchema: layoutListSchema,
       },
     ],
