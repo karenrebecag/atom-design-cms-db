@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@atom-uikit/tokens':
+        specifier: ^0.1.1
+        version: 0.1.1
       '@modelcontextprotocol/sdk':
         specifier: ^1.10.0
         version: 1.29.0(zod@3.25.76)
@@ -47,6 +50,9 @@ importers:
         version: 8.60.0(eslint@9.39.4)(typescript@5.9.3)
 
 packages:
+
+  '@atom-uikit/tokens@0.1.1':
+    resolution: {integrity: sha512-m49H50kdt2cJks+U8fw7qyJX/wWOtPKdhJVWj1IqKCPmyCh83oGVphBvwXcPDBiNrEzpfWFr8+SIKgKCh2gHgA==}
 
   '@esbuild/aix-ppc64@0.27.7':
     resolution: {integrity: sha512-EKX3Qwmhz1eMdEJokhALr0YiD0lhQNwDqkPYyPhiSwKrh7/4KRjQc04sZ8db+5DVVnZ1LmbNDI1uAMPEUBnQPg==}
@@ -1174,6 +1180,8 @@ packages:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
+
+  '@atom-uikit/tokens@0.1.1': {}
 
   '@esbuild/aix-ppc64@0.27.7':
     optional: true

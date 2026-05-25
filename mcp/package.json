@@ -21,6 +21,7 @@
     "ci": "pnpm check && pnpm check:api && pnpm lint && pnpm format:check"
   },
   "dependencies": {
+    "@atom-uikit/tokens": "^0.1.1",
     "@modelcontextprotocol/sdk": "^1.10.0",
     "@resvg/resvg-js": "^2.6.2",
     "satori": "^0.26.0",

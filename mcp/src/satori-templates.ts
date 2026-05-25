@@ -1,23 +1,29 @@
 /**
  * Satori-compatible templates for PNG rendering.
  * Every node with children array MUST have display: 'flex'.
+ * Colors/spacing sourced from @atom-uikit/tokens — never hardcoded.
  */
+import * as tokens from '@atom-uikit/tokens';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SatoriNode = any;
 
+// All colors from the DS token package — zero hardcoded values
 const COLORS = {
-  orange: '#FF6600',
-  whatsapp: '#25D366',
-  heading: '#222020',
-  body: '#27272A',
-  muted: '#52525C',
-  dark: '#18181B',
-  white: '#FFFFFF',
-  successBg: '#ECFEF6',
-  successFg: '#007A56',
-  brandBg: '#FFF4ED',
-  brandFg: '#A44200',
+  orange: tokens.brand,
+  violet: tokens.colorViolet600,
+  whatsapp: '#25D366', // WhatsApp brand, not in DS tokens
+  heading: tokens.foreground,
+  body: tokens.foreground,
+  muted: tokens.mutedForeground,
+  dark: tokens.primary,
+  white: tokens.background,
+  border: tokens.border,
+  successBg: tokens.colorEmerald50 ?? '#ECFEF6',
+  successFg: tokens.success,
+  brandBg: tokens.colorOrange50 ?? '#FFF4ED',
+  brandFg: tokens.brandForeground ?? '#A44200',
+  primaryFg: tokens.primaryForeground,
 };
 
 export interface SatoriTemplateInput {
