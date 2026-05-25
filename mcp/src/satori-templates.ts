@@ -364,10 +364,10 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                     style: {
                       display: 'flex',
                       flexWrap: 'wrap',
-                      fontSize: 46,
+                      fontSize: 64,
                       fontWeight: 700,
-                      lineHeight: 1.14,
-                      letterSpacing: '-0.025em',
+                      lineHeight: 1.1,
+                      letterSpacing: '-0.03em',
                       marginTop: 20,
                     },
                     children: hl(v.headline || ''),
@@ -380,12 +380,36 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                       props: {
                         style: {
                           display: 'flex',
-                          fontSize: 20,
+                          fontSize: 24,
                           color: 'rgba(255,255,255,0.75)',
-                          marginTop: 14,
+                          marginTop: 16,
                           lineHeight: 1.5,
                         },
                         children: v.subtitle,
+                      },
+                    }
+                  : null,
+                // CTA (optional)
+                v.cta_text
+                  ? {
+                      type: 'div',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          alignSelf: 'flex-start',
+                          backgroundColor: COLORS.white,
+                          color: COLORS.dark,
+                          fontSize: 18,
+                          fontWeight: 600,
+                          paddingTop: 14,
+                          paddingBottom: 14,
+                          paddingLeft: 28,
+                          paddingRight: 28,
+                          borderRadius: 100,
+                          marginTop: 24,
+                        },
+                        children: v.cta_text,
                       },
                     }
                   : null,
@@ -410,7 +434,7 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                             fontWeight: 500,
                             color: 'rgba(255,255,255,0.4)',
                           },
-                          children: '#AtomChat #AIAgents',
+                          children: v.hashtags || '#AtomChat #AIAgents',
                         },
                       },
                     ],

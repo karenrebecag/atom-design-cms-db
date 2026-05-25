@@ -103,6 +103,11 @@ export async function handleScreenshot(args: unknown) {
   }
 
   try {
+    // Normalize field aliases — LLM may use different names
+    if (values.tag && !values.tag_text) values.tag_text = values.tag;
+    if (values.body && !values.subtitle) values.subtitle = values.body;
+    if (values.cta && !values.cta_text) values.cta_text = values.cta;
+
     const [fonts, assets] = await Promise.all([getInterFonts(), loadAssets(values.image_url)]);
 
     const jsxNode = tmpl.build(values, assets);
