@@ -151,7 +151,7 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                padding: '36px 56px 32px',
+                padding: '40px 48px 48px',
                 flex: 1,
               },
               children: [
@@ -169,8 +169,8 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                         props: {
                           style: {
                             display: 'flex',
-                            fontSize: 14,
-                            fontWeight: 500,
+                            fontSize: 22,
+                            fontWeight: 600,
                             color: COLORS.body,
                             marginTop: 14,
                           },
@@ -184,11 +184,11 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                             props: {
                               style: {
                                 display: 'flex',
-                                fontSize: 14,
+                                fontSize: 16,
                                 fontWeight: 500,
                                 color: COLORS.muted,
                                 marginTop: 4,
-                                letterSpacing: '0.02em',
+                                letterSpacing: '0.08em',
                                 textTransform: 'uppercase' as const,
                               },
                               children: v.kicker,
@@ -202,12 +202,12 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                           style: {
                             display: 'flex',
                             flexWrap: 'wrap',
-                            fontSize: 44,
-                            fontWeight: 800,
-                            lineHeight: 1.12,
+                            fontSize: 72,
+                            fontWeight: 700,
+                            lineHeight: 1.1,
                             color: COLORS.heading,
                             letterSpacing: '-0.03em',
-                            marginTop: 12,
+                            marginTop: 16,
                           },
                           children: hl(v.headline || ''),
                         },
@@ -219,10 +219,10 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                             props: {
                               style: {
                                 display: 'flex',
-                                fontSize: 18,
+                                fontSize: 28,
                                 fontWeight: 400,
                                 color: COLORS.muted,
-                                marginTop: 14,
+                                marginTop: 16,
                                 lineHeight: 1.5,
                               },
                               children: v.subheadline,
@@ -242,11 +242,11 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                       gap: 16,
                     },
                     children: [
-                      { type: 'img', props: { src: a.logoLight, height: 28 } },
+                      { type: 'img', props: { src: a.logoLight, height: 32 } },
                       {
                         type: 'div',
                         props: {
-                          style: { width: 1.5, height: 22, backgroundColor: '#D4D4D8' },
+                          style: { width: 1.5, height: 26, backgroundColor: COLORS.border },
                         },
                       },
                       {
@@ -254,7 +254,7 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                         props: {
                           style: {
                             display: 'flex',
-                            fontSize: 13,
+                            fontSize: 18,
                             fontWeight: 600,
                             color: COLORS.muted,
                           },
