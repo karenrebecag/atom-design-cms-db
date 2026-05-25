@@ -41,53 +41,62 @@ export const TEMPLATES: Record<string, LayoutTemplate> = {
   'case-study': {
     name: 'Case Study',
     description:
-      'Client success story. Photo top ~58%, white band bottom with tag pill, metrics headline (orange/green highlights), and dual logo bar. Based on real Atom posts (Moto City, Colombo Americano).',
+      'Client success story. Photo top ~55%, white band bottom with tag pill, client name, punchy metric headline (short, impactful), and dual logo bar. Based on Moto City / Colombo Americano real posts. IMPORTANT: headline should be SHORT and metric-driven (e.g. "triplico sus ventas digitales en WhatsApp con Atom"). Client name goes in client_name field, not in the headline.',
     width: 1080,
     height: 1350,
     placeholders: {
       image_url: { description: 'Client photo URL (from atom_generate_image)', required: true },
       tag_text: {
-        description: 'Tag pill text above headline (e.g. "Caso de exito", "AI Agents")',
+        description: 'Tag pill text (e.g. "Caso de exito", "Resultados")',
         required: false,
         default: 'Caso de exito',
       },
       tag_intent: {
-        description: 'Tag color: "brand" (orange), "ai" (violet), "success" (green), "neutral"',
+        description: 'Tag color: "brand", "ai", "success", "neutral"',
         required: false,
-        default: 'brand',
+        default: 'success',
+      },
+      client_name: {
+        description:
+          'Client name displayed prominently above headline (e.g. "Centro Cultural Colombo Americano")',
+        required: true,
       },
       headline: {
         description:
-          'Result headline. Use {{hl}}text{{/hl}} for orange, {{wa}}text{{/wa}} for green WhatsApp.',
+          'SHORT metric-driven headline. Use {{hl}}text{{/hl}} for orange metrics, {{wa}}text{{/wa}} for green WhatsApp. Example: "{{hl}}triplico{{/hl}} sus {{hl}}ventas{{/hl}} digitales en {{wa}}WhatsApp{{/wa}} con Atom"',
         required: true,
       },
-      client_logo_url: { description: 'Client logo URL (SVG or PNG)', required: false },
-      client_name: { description: 'Client name for alt text', required: false, default: 'Cliente' },
+      client_logo_url: {
+        description: 'Client logo URL (SVG or PNG). Omit if unavailable.',
+        required: false,
+      },
     },
     html: `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 ${BASE_CSS}
 body{width:1080px;height:1350px;background:#fff;display:flex;flex-direction:column}
-.photo{width:100%;height:58%;object-fit:cover}
-.content{flex:1;padding:44px 60px 40px;display:flex;flex-direction:column}
-.eyebrow{margin-bottom:20px}
-.headline{font-size:40px;font-weight:700;line-height:1.18;color:#222020;letter-spacing:-0.025em}
-.logo-bar{display:flex;align-items:center;gap:16px;margin-top:auto;padding-top:28px}
-.logo-bar img{height:30px}
-.logo-bar .pipe{width:1.5px;height:24px;background:#D4D4D8;flex-shrink:0}
-.logo-bar .client-logo{height:26px}
-.logo-bar .client-name{font-size:15px;font-weight:600;color:#27272A}
+.photo{width:100%;height:55%;object-fit:cover}
+.content{flex:1;padding:40px 56px 36px;display:flex;flex-direction:column}
+.eyebrow{margin-bottom:16px}
+.client-name{font-size:16px;font-weight:600;color:#27272A;margin-bottom:8px;letter-spacing:0.01em}
+.headline{font-size:38px;font-weight:800;line-height:1.15;color:#222020;letter-spacing:-0.025em}
+.logo-bar{display:flex;align-items:center;gap:16px;margin-top:auto;padding-top:24px}
+.logo-bar img{height:28px}
+.logo-bar .pipe{width:1.5px;height:22px;background:#D4D4D8;flex-shrink:0}
+.logo-bar .client-logo{height:24px}
+.logo-bar .client-text{font-size:13px;font-weight:600;color:#52525C}
 </style>
 </head>
 <body>
 <img class="photo" src="{{image_url}}" alt="{{client_name}}">
 <div class="content">
   <div class="eyebrow"><span class="tag tag--{{tag_intent}}"><span class="tag__dot"></span>{{tag_text}}</span></div>
+  <p class="client-name">{{client_name}}</p>
   <h1 class="headline">{{headline}}</h1>
   <div class="logo-bar">
     <img src="${LOGO_LIGHT}" alt="Atom">
