@@ -6,7 +6,10 @@
   "bin": {
     "atom-docs-mcp": "./dist/index.js"
   },
-  "files": ["dist", "assets"],
+  "files": [
+    "dist",
+    "assets"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
@@ -19,15 +22,18 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "satori": "^0.26.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "eslint": "^9.0.0",
     "@eslint/js": "^9.0.0",
-    "typescript-eslint": "^8.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.15",
+    "eslint": "^9.0.0",
     "prettier": "^3.4.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.0.0"
   }
 }

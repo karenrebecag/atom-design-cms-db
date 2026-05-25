@@ -12,6 +12,7 @@ import {
 } from './tools/get-image-prompt.js';
 import { handleGenerateImage, generateImageSchema } from './tools/generate-image.js';
 import { handleLayout, layoutSchema, handleLayoutList, layoutListSchema } from './tools/layout.js';
+import { handleScreenshot, screenshotSchema } from './tools/screenshot.js';
 import { INSTRUCTIONS } from './instructions.js';
 
 export function createServer(): Server {
@@ -71,6 +72,12 @@ export function createServer(): Server {
         inputSchema: layoutSchema,
       },
       {
+        name: 'atom_layout_screenshot',
+        description:
+          'Render a layout template directly to a PNG image. Returns the image inline — no HTML, no browser needed. Use this instead of atom_layout when the user needs a final image (social media post, banner). Flow: atom_generate_image (photo) → atom_layout_screenshot (template + photo → PNG).',
+        inputSchema: screenshotSchema,
+      },
+      {
         name: 'atom_layout_list',
         description:
           'List all available layout templates with their placeholders and descriptions. Call this to see what templates exist before using atom_layout.',
@@ -100,6 +107,8 @@ export function createServer(): Server {
           return handleGenerateImage(args);
         case 'atom_layout':
           return handleLayout(args);
+        case 'atom_layout_screenshot':
+          return handleScreenshot(args);
         case 'atom_layout_list':
           return handleLayoutList(args);
         default:
