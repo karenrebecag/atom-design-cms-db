@@ -1,6 +1,9 @@
+import { z } from 'zod';
 import { fetchDocBySlug } from '../client.js';
 import { blocksToMarkdown } from '../blocks-to-text.js';
 import { fetchBrandContext } from './list-docs.js';
+
+const GetDocInput = z.object({ slug: z.string().min(1) });
 
 export const getDocSchema = {
   type: 'object' as const,
@@ -15,7 +18,14 @@ export const getDocSchema = {
 };
 
 export async function handleGetDoc(args: unknown) {
-  const { slug } = args as { slug: string };
+  const parsed = GetDocInput.safeParse(args);
+  if (!parsed.success) {
+    return {
+      content: [{ type: 'text' as const, text: `Invalid input: ${parsed.error.message}` }],
+      isError: true,
+    };
+  }
+  const { slug } = parsed.data;
 
   const result = await fetchDocBySlug(slug);
 

@@ -2,15 +2,17 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import type { IncomingMessage, ServerResponse } from 'http';
 import { createServer } from '../src/server.js';
 
-// --- handler ---
-
 export default async function handler(
   req: IncomingMessage & { body?: unknown },
   res: ServerResponse,
 ) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Accept, Authorization, Mcp-Session-Id',
+  );
+  res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -21,6 +23,11 @@ export default async function handler(
   const server = createServer();
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
+  });
+
+  res.on('close', () => {
+    transport.close();
+    server.close();
   });
 
   try {

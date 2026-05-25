@@ -17,11 +17,22 @@ export const generateImageSchema = {
   required: ['prompt'],
 };
 
+import { z } from 'zod';
+
+const GenerateImageInput = z.object({
+  prompt: z.string().min(1),
+  size: z.enum(['square_hd', 'landscape_16_9', 'portrait_9_16']).default('square_hd'),
+});
+
 export async function handleGenerateImage(args: unknown) {
-  const { prompt, size = 'square_hd' } = args as {
-    prompt: string;
-    size?: string;
-  };
+  const parsed = GenerateImageInput.safeParse(args);
+  if (!parsed.success) {
+    return {
+      content: [{ type: 'text' as const, text: `Invalid input: ${parsed.error.message}` }],
+      isError: true,
+    };
+  }
+  const { prompt, size } = parsed.data;
 
   if (!FAL_API_KEY) {
     return {

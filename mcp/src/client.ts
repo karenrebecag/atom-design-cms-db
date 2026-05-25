@@ -1,14 +1,15 @@
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables');
+function getConfig() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY');
+  return {
+    base: `${url}/functions/v1`,
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+    },
+  };
 }
-
-const headers = {
-  apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-};
 
 interface CacheEntry<T> {
   data: T;
@@ -24,6 +25,7 @@ async function fetchWithCache<T>(url: string): Promise<T> {
     return entry.data as T;
   }
 
+  const { headers } = getConfig();
   const res = await fetch(url, { headers });
   if (!res.ok) {
     throw new Error(`Edge function error: ${res.status} ${res.statusText}`);
@@ -73,14 +75,14 @@ export interface NavigationResponse {
   siteConfig: { site_name: string; site_description?: string };
 }
 
-const base = `${SUPABASE_URL}/functions/v1`;
-
 export async function fetchDocs(): Promise<Doc[]> {
+  const { base } = getConfig();
   const data = await fetchWithCache<{ docs: Doc[] }>(`${base}/get-docs`);
   return data.docs;
 }
 
 export async function fetchDocBySlug(slug: string): Promise<DocWithBlocks | null> {
+  const { base, headers } = getConfig();
   const url = `${base}/get-docs?slug=${encodeURIComponent(slug)}`;
   const entry = cache.get(url);
   if (entry && Date.now() - entry.timestamp < TTL) {
@@ -99,5 +101,6 @@ export async function fetchDocBySlug(slug: string): Promise<DocWithBlocks | null
 }
 
 export async function fetchNavigation(): Promise<NavigationResponse> {
+  const { base } = getConfig();
   return fetchWithCache<NavigationResponse>(`${base}/get-navigation`);
 }
