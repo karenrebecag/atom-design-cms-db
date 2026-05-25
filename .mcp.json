@@ -1,9 +1,8 @@
 {
   "mcpServers": {
     "atom-docs": {
-      "command": "npx",
-      "args": ["tsx", "/Users/karenrebecaortiz/Desktop/SoftwareDevProjects/atom-design-cms-db/mcp/src/index.ts"],
-      "cwd": "/Users/karenrebecaortiz/Desktop/SoftwareDevProjects/atom-design-cms-db/mcp",
+      "command": "pnpm",
+      "args": ["--dir", "./mcp", "dev"],
       "env": {
         "SUPABASE_URL": "https://fejpujhqnlfjhfpqetgx.supabase.co",
         "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlanB1amhxbmxmamhmcHFldGd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODYxMDcsImV4cCI6MjA5MzY2MjEwN30.vk25A2C_UGypdQ6ab_bC0ID3eiB_UHeKxaF--t4LJxM"
