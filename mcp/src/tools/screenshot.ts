@@ -13,7 +13,7 @@ export const screenshotSchema = {
   properties: {
     template: {
       type: 'string',
-      enum: ['case-study', 'photo-overlay-dark'],
+      enum: ['case-study', 'photo-overlay-dark', 'stat-card', 'quote-card', 'stat-card-gradient'],
       description: 'Template to render as PNG image.',
     },
     values: {

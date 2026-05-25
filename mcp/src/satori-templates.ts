@@ -349,6 +349,347 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
       },
     }),
   },
+  'stat-card': {
+    name: 'Stat Card',
+    width: 1080,
+    height: 1080,
+    build: (v, a) => ({
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: 1080,
+          height: 1080,
+          backgroundColor: v.bg === 'light' ? COLORS.white : COLORS.dark,
+          fontFamily: 'Inter',
+          padding: '80px',
+          textAlign: 'center',
+        },
+        children: [
+          // Big number
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                fontSize: 96,
+                fontWeight: 800,
+                color: COLORS.orange,
+                lineHeight: 1,
+                letterSpacing: '-0.04em',
+              },
+              children: v.number || '3x',
+            },
+          },
+          // Context line
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                fontSize: 24,
+                fontWeight: 500,
+                color: v.bg === 'light' ? COLORS.body : 'rgba(255,255,255,0.7)',
+                marginTop: 16,
+                lineHeight: 1.4,
+              },
+              children: v.context || '',
+            },
+          },
+          // Divider
+          {
+            type: 'div',
+            props: {
+              style: {
+                width: 60,
+                height: 1.5,
+                backgroundColor: v.bg === 'light' ? '#D4D4D8' : '#333333',
+                marginTop: 32,
+                marginBottom: 32,
+              },
+            },
+          },
+          // Headline
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                fontSize: 32,
+                fontWeight: 700,
+                color: v.bg === 'light' ? COLORS.heading : COLORS.white,
+                lineHeight: 1.3,
+                letterSpacing: '-0.02em',
+              },
+              children: hl(v.headline || ''),
+            },
+          },
+          // Logo bottom
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                marginTop: 'auto',
+              },
+              children: [
+                {
+                  type: 'img',
+                  props: {
+                    src: v.bg === 'light' ? a.logoLight : a.logoDark,
+                    height: 28,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    }),
+  },
+
+  'quote-card': {
+    name: 'Quote Card',
+    width: 1080,
+    height: 1350,
+    build: (v, a) => ({
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: 1080,
+          height: 1350,
+          backgroundColor: '#FAFAFA',
+          fontFamily: 'Inter',
+          padding: '80px 64px',
+          border: '1px solid #E4E4E7',
+        },
+        children: [
+          // Avatar + name row
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                gap: 16,
+                marginBottom: 40,
+              },
+              children: [
+                // Avatar circle with initials
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      backgroundColor: COLORS.orange,
+                      color: COLORS.white,
+                      fontSize: 28,
+                      fontWeight: 800,
+                    },
+                    children: (v.author_name || 'A')[0].toUpperCase(),
+                  },
+                },
+                // Name + role
+                {
+                  type: 'div',
+                  props: {
+                    style: { display: 'flex', flexDirection: 'column', gap: 4 },
+                    children: [
+                      {
+                        type: 'div',
+                        props: {
+                          style: {
+                            display: 'flex',
+                            fontSize: 18,
+                            fontWeight: 700,
+                            color: COLORS.heading,
+                          },
+                          children: v.author_name || '',
+                        },
+                      },
+                      {
+                        type: 'div',
+                        props: {
+                          style: { display: 'flex', fontSize: 14, color: COLORS.muted },
+                          children: v.author_role || '',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          // Quote with orange bar
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 24,
+                flex: 1,
+              },
+              children: [
+                // Orange bar
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      width: 3,
+                      backgroundColor: COLORS.orange,
+                      borderRadius: 2,
+                      flexShrink: 0,
+                    },
+                  },
+                },
+                // Quote text
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      fontSize: 28,
+                      fontWeight: 600,
+                      color: COLORS.heading,
+                      lineHeight: 1.5,
+                      letterSpacing: '-0.01em',
+                    },
+                    children: `"${v.quote || ''}"`,
+                  },
+                },
+              ],
+            },
+          },
+          // Logo bar
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 'auto',
+                paddingTop: 32,
+              },
+              children: [
+                { type: 'img', props: { src: a.logoLight, height: 28 } },
+                {
+                  type: 'div',
+                  props: {
+                    style: { display: 'flex', fontSize: 13, fontWeight: 500, color: '#8023FF' },
+                    children: '#AtomChat',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    }),
+  },
+
+  'stat-card-gradient': {
+    name: 'Stat Card Gradient',
+    width: 1080,
+    height: 1080,
+    build: (v, a) => ({
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: 1080,
+          height: 1080,
+          background: 'linear-gradient(136deg, #8023FF 0%, #FF6600 100%)',
+          fontFamily: 'Inter',
+          padding: '80px',
+          textAlign: 'center',
+          color: COLORS.white,
+        },
+        children: [
+          // Big number
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                fontSize: 96,
+                fontWeight: 800,
+                lineHeight: 1,
+                letterSpacing: '-0.04em',
+              },
+              children: v.number || '',
+            },
+          },
+          // Context
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                fontSize: 24,
+                fontWeight: 500,
+                color: 'rgba(255,255,255,0.85)',
+                marginTop: 16,
+                lineHeight: 1.4,
+              },
+              children: v.context || '',
+            },
+          },
+          // Divider
+          {
+            type: 'div',
+            props: {
+              style: {
+                width: 60,
+                height: 2,
+                backgroundColor: 'rgba(255,255,255,0.3)',
+                marginTop: 32,
+                marginBottom: 32,
+              },
+            },
+          },
+          // Headline
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                fontSize: 32,
+                fontWeight: 700,
+                lineHeight: 1.3,
+                letterSpacing: '-0.02em',
+              },
+              children: v.headline || '',
+            },
+          },
+          // Logo
+          {
+            type: 'div',
+            props: {
+              style: { display: 'flex', marginTop: 'auto' },
+              children: [{ type: 'img', props: { src: a.logoDark, height: 28 } }],
+            },
+          },
+        ],
+      },
+    }),
+  },
 };
 
 export function getSatoriTemplate(name: string): SatoriTemplate | undefined {
