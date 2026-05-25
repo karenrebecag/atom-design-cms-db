@@ -25,17 +25,29 @@ export const screenshotSchema = {
   required: ['template', 'values'],
 };
 
-// Font cache — loaded once
-let fontCache: ArrayBuffer | null = null;
+// Font cache — loaded once per weight
+const fontCache = new Map<number, ArrayBuffer>();
+const FONT_BASE = 'https://cdn.jsdelivr.net/npm/@fontsource/inter/files';
 
-async function getInterFont(): Promise<ArrayBuffer> {
-  if (fontCache) return fontCache;
-  const res = await fetch(
-    'https://cdn.jsdelivr.net/npm/@fontsource/inter/files/inter-latin-700-normal.woff',
-  );
-  if (!res.ok) throw new Error(`Failed to fetch Inter font: ${res.status}`);
-  fontCache = await res.arrayBuffer();
-  return fontCache;
+async function fetchFont(weight: number): Promise<ArrayBuffer> {
+  const cached = fontCache.get(weight);
+  if (cached) return cached;
+  const res = await fetch(`${FONT_BASE}/inter-latin-${weight}-normal.woff`);
+  if (!res.ok) throw new Error(`Failed to fetch Inter ${weight}: ${res.status}`);
+  const buf = await res.arrayBuffer();
+  fontCache.set(weight, buf);
+  return buf;
+}
+
+async function getInterFonts() {
+  const [w500, w700, w800] = await Promise.all([fetchFont(500), fetchFont(700), fetchFont(800)]);
+  return [
+    { name: 'Inter', data: w500, weight: 400 as const, style: 'normal' as const },
+    { name: 'Inter', data: w500, weight: 500 as const, style: 'normal' as const },
+    { name: 'Inter', data: w700, weight: 600 as const, style: 'normal' as const },
+    { name: 'Inter', data: w700, weight: 700 as const, style: 'normal' as const },
+    { name: 'Inter', data: w800, weight: 800 as const, style: 'normal' as const },
+  ];
 }
 
 // Pre-fetch an image URL as data URI
@@ -91,7 +103,7 @@ export async function handleScreenshot(args: unknown) {
   }
 
   try {
-    const [font, assets] = await Promise.all([getInterFont(), loadAssets(values.image_url)]);
+    const [fonts, assets] = await Promise.all([getInterFonts(), loadAssets(values.image_url)]);
 
     const jsxNode = tmpl.build(values, assets);
 
@@ -99,12 +111,7 @@ export async function handleScreenshot(args: unknown) {
     const svg = await satori(jsxNode as any, {
       width: tmpl.width,
       height: tmpl.height,
-      fonts: [
-        { name: 'Inter', data: font, weight: 400, style: 'normal' as const },
-        { name: 'Inter', data: font, weight: 600, style: 'normal' as const },
-        { name: 'Inter', data: font, weight: 700, style: 'normal' as const },
-        { name: 'Inter', data: font, weight: 800, style: 'normal' as const },
-      ],
+      fonts,
     });
 
     const resvg = new Resvg(svg, {
@@ -112,9 +119,7 @@ export async function handleScreenshot(args: unknown) {
     });
     const png = resvg.render().asPng();
 
-    // Return as base64 data URI — Claude can display this directly
     const base64 = Buffer.from(png).toString('base64');
-    const dataUri = `data:image/png;base64,${base64}`;
 
     return {
       content: [

@@ -232,78 +232,117 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
       props: {
         style: {
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
+          position: 'relative',
           width: 1080,
           height: 1350,
-          padding: '56px 60px',
           fontFamily: 'Inter',
           color: COLORS.white,
           backgroundColor: COLORS.dark,
-          backgroundImage: a.photo ? `url(${a.photo})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
         },
         children: [
-          // Tag
-          v.tag_text ? pill(v.tag_text, v.tag_intent || 'brand') : null,
-          // Headline
-          {
-            type: 'div',
-            props: {
-              style: {
-                display: 'flex',
-                flexWrap: 'wrap',
-                fontSize: 46,
-                fontWeight: 700,
-                lineHeight: 1.14,
-                letterSpacing: '-0.025em',
-                marginTop: 20,
-              },
-              children: hl(v.headline || ''),
-            },
-          },
-          // Subtitle
-          v.subtitle
+          // Background photo (absolute)
+          a.photo
             ? {
-                type: 'div',
+                type: 'img',
                 props: {
-                  style: {
-                    display: 'flex',
-                    fontSize: 20,
-                    color: 'rgba(255,255,255,0.75)',
-                    marginTop: 14,
-                    lineHeight: 1.5,
-                  },
-                  children: v.subtitle,
+                  src: a.photo,
+                  width: 1080,
+                  height: 1350,
+                  style: { position: 'absolute', top: 0, left: 0, objectFit: 'cover' },
                 },
               }
             : null,
-          // Footer
+          // Dark overlay (absolute)
           {
             type: 'div',
             props: {
               style: {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: 1080,
+                height: 1350,
+                background:
+                  'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.88) 100%)',
+              },
+            },
+          },
+          // Content (relative, on top)
+          {
+            type: 'div',
+            props: {
+              style: {
+                position: 'relative',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginTop: 40,
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                width: 1080,
+                height: 1350,
+                padding: '56px 60px',
               },
               children: [
-                { type: 'img', props: { src: a.logoDark, height: 28 } },
+                // Tag
+                v.tag_text ? pill(v.tag_text, v.tag_intent || 'brand') : null,
+                // Headline
                 {
                   type: 'div',
                   props: {
                     style: {
                       display: 'flex',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: 'rgba(255,255,255,0.4)',
+                      flexWrap: 'wrap',
+                      fontSize: 46,
+                      fontWeight: 700,
+                      lineHeight: 1.14,
+                      letterSpacing: '-0.025em',
+                      marginTop: 20,
                     },
-                    children: '#AtomChat #AIAgents',
+                    children: hl(v.headline || ''),
                   },
                 },
-              ],
+                // Subtitle
+                v.subtitle
+                  ? {
+                      type: 'div',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          fontSize: 20,
+                          color: 'rgba(255,255,255,0.75)',
+                          marginTop: 14,
+                          lineHeight: 1.5,
+                        },
+                        children: v.subtitle,
+                      },
+                    }
+                  : null,
+                // Footer
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: 40,
+                    },
+                    children: [
+                      { type: 'img', props: { src: a.logoDark, height: 28 } },
+                      {
+                        type: 'div',
+                        props: {
+                          style: {
+                            display: 'flex',
+                            fontSize: 13,
+                            fontWeight: 500,
+                            color: 'rgba(255,255,255,0.4)',
+                          },
+                          children: '#AtomChat #AIAgents',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ].filter(Boolean),
             },
           },
         ].filter(Boolean),
