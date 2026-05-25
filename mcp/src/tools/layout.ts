@@ -1,4 +1,10 @@
+import { z } from 'zod';
 import { getTemplate, listTemplates, renderTemplate } from '../templates.js';
+
+const LayoutInput = z.object({
+  template: z.string().min(1),
+  values: z.record(z.string()),
+});
 
 export const layoutSchema = {
   type: 'object' as const,
@@ -36,7 +42,14 @@ export const layoutListSchema = {
 };
 
 export async function handleLayout(args: unknown) {
-  const { template, values } = args as { template: string; values: Record<string, string> };
+  const parsed = LayoutInput.safeParse(args);
+  if (!parsed.success) {
+    return {
+      content: [{ type: 'text' as const, text: `Invalid input: ${parsed.error.message}` }],
+      isError: true,
+    };
+  }
+  const { template, values } = parsed.data;
 
   const tmpl = getTemplate(template);
   if (!tmpl) {

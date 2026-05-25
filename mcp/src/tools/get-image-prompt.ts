@@ -51,11 +51,23 @@ async function fetchImagePromptAPI(path: string, method: 'GET' | 'POST' = 'GET',
   return res.json();
 }
 
+import { z } from 'zod';
+
+const ImagePromptInput = z.object({
+  use_case: z.string().min(1),
+  values: z.record(z.string()),
+});
+const ListPromptsInput = z.object({ category: z.string().optional() });
+
 export async function handleGetImagePrompt(args: unknown) {
-  const { use_case, values } = args as {
-    use_case: string;
-    values: Record<string, string>;
-  };
+  const parsed = ImagePromptInput.safeParse(args);
+  if (!parsed.success) {
+    return {
+      content: [{ type: 'text' as const, text: `Invalid input: ${parsed.error.message}` }],
+      isError: true,
+    };
+  }
+  const { use_case, values } = parsed.data;
 
   // Step 1: Find template by use case (lightweight, no full template loaded)
   const matchData = await fetchImagePromptAPI(`?use_case=${encodeURIComponent(use_case)}`);
@@ -92,7 +104,8 @@ export async function handleGetImagePrompt(args: unknown) {
 }
 
 export async function handleListImagePrompts(args: unknown) {
-  const { category } = (args ?? {}) as { category?: string };
+  const parsed = ListPromptsInput.safeParse(args ?? {});
+  const { category } = parsed.success ? parsed.data : { category: undefined };
   const query = category ? `?category=${encodeURIComponent(category)}` : '';
   const data = await fetchImagePromptAPI(query);
 

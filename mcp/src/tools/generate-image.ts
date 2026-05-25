@@ -1,4 +1,6 @@
-const FAL_API_KEY = process.env.FAL_API_KEY;
+function getFalKey() {
+  return process.env.FAL_API_KEY;
+}
 
 export const generateImageSchema = {
   type: 'object' as const,
@@ -34,12 +36,12 @@ export async function handleGenerateImage(args: unknown) {
   }
   const { prompt, size } = parsed.data;
 
-  if (!FAL_API_KEY) {
+  if (!getFalKey()) {
     return {
       content: [
         {
           type: 'text' as const,
-          text: 'FAL_API_KEY not configured. Set it as an environment variable.',
+          text: 'getFalKey() not configured. Set it as an environment variable.',
         },
       ],
       isError: true,
@@ -50,7 +52,7 @@ export async function handleGenerateImage(args: unknown) {
     const res = await fetch('https://fal.run/fal-ai/flux/dev', {
       method: 'POST',
       headers: {
-        Authorization: `Key ${FAL_API_KEY}`,
+        Authorization: `Key ${getFalKey()}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

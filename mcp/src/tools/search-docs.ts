@@ -1,4 +1,7 @@
+import { z } from 'zod';
 import { fetchDocs } from '../client.js';
+
+const SearchInput = z.object({ query: z.string().min(1) });
 
 export const searchDocsSchema = {
   type: 'object' as const,
@@ -27,7 +30,14 @@ function scoreMatch(text: string, query: string): number {
 }
 
 export async function handleSearchDocs(args: unknown) {
-  const { query } = args as { query: string };
+  const parsed = SearchInput.safeParse(args);
+  if (!parsed.success) {
+    return {
+      content: [{ type: 'text' as const, text: `Invalid input: ${parsed.error.message}` }],
+      isError: true,
+    };
+  }
+  const { query } = parsed.data;
 
   if (!query || query.trim().length === 0) {
     return {

@@ -1,22 +1,21 @@
-import type { IncomingMessage, ServerResponse } from 'http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 
-function requireEnv(name: string): string {
-  const val = process.env[name];
-  if (!val) throw new Error(`Missing required env var: ${name}`);
-  return val;
+function getProxyConfig() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
+  const secret = process.env.RESTRICTED_CONTENT_SECRET;
+  if (!url || !key || !secret)
+    throw new Error('Missing SUPABASE_URL, SUPABASE_ANON_KEY, or RESTRICTED_CONTENT_SECRET');
+  return {
+    base: `${url}/functions/v1`,
+    serviceKey: secret,
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    },
+  };
 }
-
-const SUPABASE_URL = requireEnv('SUPABASE_URL');
-const SUPABASE_ANON_KEY = requireEnv('SUPABASE_ANON_KEY');
-const SERVICE_KEY = requireEnv('RESTRICTED_CONTENT_SECRET');
-
-const supaHeaders = {
-  apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-  'Content-Type': 'application/json',
-};
-
-const base = `${SUPABASE_URL}/functions/v1`;
 
 function json(res: ServerResponse, data: unknown, status = 200) {
   res.writeHead(status, { 'Content-Type': 'application/json' });
@@ -74,9 +73,11 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
   const path = url.pathname.replace('/gpt', '').replace(/^\//, '') || 'help';
 
   try {
+    const cfg = getProxyConfig();
+
     // GET /gpt/docs — compact list of all docs
     if (path === 'docs' && !url.searchParams.get('slug')) {
-      const r = await fetch(`${base}/get-docs`, { headers: supaHeaders });
+      const r = await fetch(`${cfg.base}/get-docs`, { headers: cfg.headers });
       const d = (await r.json()) as { docs: any[] };
       return json(
         res,
@@ -91,8 +92,8 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
     // GET /gpt/docs?slug=colores — single doc as markdown
     if (path === 'docs' && url.searchParams.get('slug')) {
       const slug = url.searchParams.get('slug')!;
-      const r = await fetch(`${base}/get-docs?slug=${encodeURIComponent(slug)}`, {
-        headers: supaHeaders,
+      const r = await fetch(`${cfg.base}/get-docs?slug=${encodeURIComponent(slug)}`, {
+        headers: cfg.headers,
       });
       if (!r.ok) return json(res, { error: 'not found' }, 404);
       const d = (await r.json()) as { doc: any; blocks: any[] };
@@ -106,7 +107,7 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
 
     // GET /gpt/nav — compact navigation tree
     if (path === 'nav') {
-      const r = await fetch(`${base}/get-navigation`, { headers: supaHeaders });
+      const r = await fetch(`${cfg.base}/get-navigation`, { headers: cfg.headers });
       const d = (await r.json()) as { tree: any[] };
       function flatten(
         nodes: any[],
@@ -126,9 +127,12 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
     if (path === 'image-prompt' && req.method === 'GET') {
       const useCase = url.searchParams.get('use_case');
       if (!useCase) return json(res, { error: 'use_case required' }, 400);
-      const r = await fetch(`${base}/get-image-prompt?use_case=${encodeURIComponent(useCase)}`, {
-        headers: { ...supaHeaders, 'x-service-key': SERVICE_KEY },
-      });
+      const r = await fetch(
+        `${cfg.base}/get-image-prompt?use_case=${encodeURIComponent(useCase)}`,
+        {
+          headers: { ...cfg.headers, 'x-service-key': cfg.serviceKey },
+        },
+      );
       if (!r.ok) return json(res, { error: 'no template for this use case' }, 404);
       return json(res, await r.json());
     }
@@ -154,9 +158,9 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
         return json(res, { error: 'need prompt_name and values' }, 400);
       }
 
-      const r = await fetch(`${base}/get-image-prompt`, {
+      const r = await fetch(`${cfg.base}/get-image-prompt`, {
         method: 'POST',
-        headers: { ...supaHeaders, 'x-service-key': SERVICE_KEY },
+        headers: { ...cfg.headers, 'x-service-key': cfg.serviceKey },
         body: JSON.stringify(body),
       });
       if (!r.ok) {
