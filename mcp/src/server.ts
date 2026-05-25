@@ -11,6 +11,7 @@ import {
   listImagePromptsSchema,
 } from './tools/get-image-prompt.js';
 import { handleGenerateImage, generateImageSchema } from './tools/generate-image.js';
+import { handleLayout, layoutSchema, handleLayoutList, layoutListSchema } from './tools/layout.js';
 import { INSTRUCTIONS } from './instructions.js';
 
 export function createServer(): Server {
@@ -63,6 +64,18 @@ export function createServer(): Server {
           'Generate a photorealistic image using Flux AI. Pass the prompt from atom_image_prompt. Returns an image URL to use as background-image in HTML/CSS. The image contains NO text and NO logos — those are added in the HTML layer.',
         inputSchema: generateImageSchema,
       },
+      {
+        name: 'atom_layout',
+        description:
+          'Render a brand-consistent HTML layout from a template. Returns complete HTML artifact (1080x1350, 4:5). Use after generating an image with atom_generate_image. Templates: case-study, photo-overlay-dark, event-hero, split-layout, editorial-light.',
+        inputSchema: layoutSchema,
+      },
+      {
+        name: 'atom_layout_list',
+        description:
+          'List all available layout templates with their placeholders and descriptions. Call this to see what templates exist before using atom_layout.',
+        inputSchema: layoutListSchema,
+      },
     ],
   }));
 
@@ -85,6 +98,10 @@ export function createServer(): Server {
           return handleListImagePrompts(args);
         case 'atom_generate_image':
           return handleGenerateImage(args);
+        case 'atom_layout':
+          return handleLayout(args);
+        case 'atom_layout_list':
+          return handleLayoutList(args);
         default:
           return {
             content: [{ type: 'text', text: `Unknown tool: ${name}` }],
