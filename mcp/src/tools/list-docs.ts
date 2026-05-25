@@ -26,8 +26,7 @@ export const listDocsSchema = {
   properties: {
     category: {
       type: 'string',
-      description:
-        'Filter by category slug (e.g. "logo", "tipografia"). Omit to list all docs.',
+      description: 'Filter by category slug (e.g. "logo", "tipografia"). Omit to list all docs.',
     },
   },
 };
@@ -38,7 +37,6 @@ export async function handleListDocs(args: unknown) {
   const [docs, nav] = await Promise.all([fetchDocs(), fetchNavigation()]);
 
   // Build category map from navigation tree
-  const categoryMap = new Map<number, string>();
   function walk(nodes: typeof nav.tree) {
     for (const node of nodes) {
       if (node.type === 'folder') {

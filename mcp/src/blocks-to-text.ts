@@ -72,9 +72,7 @@ function lexicalNodeToMd(node: unknown, depth = 0): string {
   }
 
   // Container nodes
-  const children = ((n.children as unknown[]) ?? [])
-    .map((c) => lexicalNodeToMd(c, depth))
-    .join('');
+  const children = ((n.children as unknown[]) ?? []).map((c) => lexicalNodeToMd(c, depth)).join('');
 
   switch (n.type) {
     case 'heading': {
@@ -136,27 +134,20 @@ function stepsToMarkdown(block: Block): string {
 }
 
 function cardGridToMarkdown(block: Block): string {
-  const cards =
-    (block.cards as { title?: string; description?: string }[]) ?? [];
-  return cards
-    .map((card) => `- **${card.title ?? ''}** — ${card.description ?? ''}`)
-    .join('\n');
+  const cards = (block.cards as { title?: string; description?: string }[]) ?? [];
+  return cards.map((card) => `- **${card.title ?? ''}** — ${card.description ?? ''}`).join('\n');
 }
 
 function tableToMarkdown(block: Block): string {
   const headers = (block.headers as { label?: string }[]) ?? [];
-  const rows =
-    (block.rows as { cells?: { value?: string }[] }[]) ?? [];
+  const rows = (block.rows as { cells?: { value?: string }[] }[]) ?? [];
 
   if (headers.length === 0) return '';
 
   const headerRow = `| ${headers.map((h) => h.label ?? '').join(' | ')} |`;
   const separator = `| ${headers.map(() => '---').join(' | ')} |`;
   const dataRows = rows
-    .map(
-      (row) =>
-        `| ${(row.cells ?? []).map((c) => c.value ?? '').join(' | ')} |`,
-    )
+    .map((row) => `| ${(row.cells ?? []).map((c) => c.value ?? '').join(' | ')} |`)
     .join('\n');
 
   return `${headerRow}\n${separator}\n${dataRows}`;

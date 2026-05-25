@@ -2,9 +2,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error(
-    'Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables',
-  );
+  throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables');
 }
 
 const headers = {
@@ -82,16 +80,22 @@ export async function fetchDocs(): Promise<Doc[]> {
   return data.docs;
 }
 
-export async function fetchDocBySlug(
-  slug: string,
-): Promise<DocWithBlocks | null> {
-  try {
-    return await fetchWithCache<DocWithBlocks>(
-      `${base}/get-docs?slug=${encodeURIComponent(slug)}`,
-    );
-  } catch {
-    return null;
+export async function fetchDocBySlug(slug: string): Promise<DocWithBlocks | null> {
+  const url = `${base}/get-docs?slug=${encodeURIComponent(slug)}`;
+  const entry = cache.get(url);
+  if (entry && Date.now() - entry.timestamp < TTL) {
+    return entry.data as DocWithBlocks;
   }
+
+  const res = await fetch(url, { headers });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`Edge function error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = (await res.json()) as DocWithBlocks;
+  cache.set(url, { data, timestamp: Date.now() });
+  return data;
 }
 
 export async function fetchNavigation(): Promise<NavigationResponse> {

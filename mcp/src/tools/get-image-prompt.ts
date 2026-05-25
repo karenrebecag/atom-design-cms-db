@@ -29,27 +29,20 @@ export const listImagePromptsSchema = {
   },
 };
 
-async function fetchImagePromptAPI(
-  path: string,
-  method: 'GET' | 'POST' = 'GET',
-  body?: unknown,
-) {
+async function fetchImagePromptAPI(path: string, method: 'GET' | 'POST' = 'GET', body?: unknown) {
   if (!SUPABASE_URL || !SERVICE_KEY) {
     throw new Error('Missing SUPABASE_URL or RESTRICTED_CONTENT_SECRET');
   }
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/get-image-prompt${path}`,
-    {
-      method,
-      headers: {
-        Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        'x-service-key': SERVICE_KEY,
-      },
-      ...(body ? { body: JSON.stringify(body) } : {}),
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/get-image-prompt${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'x-service-key': SERVICE_KEY,
     },
-  );
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
 
   if (!res.ok) {
     throw new Error(`Image prompt API error: ${res.status}`);
@@ -65,9 +58,7 @@ export async function handleGetImagePrompt(args: unknown) {
   };
 
   // Step 1: Find template by use case (lightweight, no full template loaded)
-  const matchData = await fetchImagePromptAPI(
-    `?use_case=${encodeURIComponent(use_case)}`,
-  );
+  const matchData = await fetchImagePromptAPI(`?use_case=${encodeURIComponent(use_case)}`);
 
   const matches = matchData.matches as { name: string }[];
   if (!matches || matches.length === 0) {
@@ -111,9 +102,7 @@ export async function handleListImagePrompts(args: unknown) {
     use_cases: string[];
   }[];
 
-  const lines = prompts.map((p) =>
-    `- **${p.name}** (${p.category}): ${p.use_cases.join(', ')}`,
-  );
+  const lines = prompts.map((p) => `- **${p.name}** (${p.category}): ${p.use_cases.join(', ')}`);
 
   return {
     content: [

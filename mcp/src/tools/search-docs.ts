@@ -5,8 +5,7 @@ export const searchDocsSchema = {
   properties: {
     query: {
       type: 'string',
-      description:
-        'Search query (e.g. "logo", "color", "tipografía", "contacto")',
+      description: 'Search query (e.g. "logo", "color", "tipografía", "contacto")',
     },
   },
   required: ['query'],
@@ -32,9 +31,7 @@ export async function handleSearchDocs(args: unknown) {
 
   if (!query || query.trim().length === 0) {
     return {
-      content: [
-        { type: 'text' as const, text: 'Please provide a search query.' },
-      ],
+      content: [{ type: 'text' as const, text: 'Please provide a search query.' }],
       isError: true,
     };
   }
@@ -45,9 +42,7 @@ export async function handleSearchDocs(args: unknown) {
     .map((doc) => {
       const titleScore = scoreMatch(doc.title, query);
       const slugScore = scoreMatch(doc.slug, query) * 0.8;
-      const descScore = doc.description
-        ? scoreMatch(doc.description, query) * 0.5
-        : 0;
+      const descScore = doc.description ? scoreMatch(doc.description, query) * 0.5 : 0;
       const score = Math.max(titleScore, slugScore, descScore);
       return { doc, score };
     })

@@ -1,25 +1,16 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { handleListDocs, listDocsSchema } from './tools/list-docs.js';
 import { handleGetDoc, getDocSchema } from './tools/get-doc.js';
 import { handleSearchDocs, searchDocsSchema } from './tools/search-docs.js';
-import {
-  handleGetNavigation,
-  getNavigationSchema,
-} from './tools/get-navigation.js';
+import { handleGetNavigation, getNavigationSchema } from './tools/get-navigation.js';
 import {
   handleGetImagePrompt,
   getImagePromptSchema,
   handleListImagePrompts,
   listImagePromptsSchema,
 } from './tools/get-image-prompt.js';
-import {
-  handleGenerateImage,
-  generateImageSchema,
-} from './tools/generate-image.js';
+import { handleGenerateImage, generateImageSchema } from './tools/generate-image.js';
 import { INSTRUCTIONS } from './instructions.js';
 
 export function createServer(): Server {
@@ -78,26 +69,34 @@ export function createServer(): Server {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
-    switch (name) {
-      case 'atom_docs_list':
-        return handleListDocs(args);
-      case 'atom_docs_get':
-        return handleGetDoc(args);
-      case 'atom_docs_search':
-        return handleSearchDocs(args);
-      case 'atom_docs_navigation':
-        return handleGetNavigation();
-      case 'atom_image_prompt':
-        return handleGetImagePrompt(args);
-      case 'atom_image_prompt_list':
-        return handleListImagePrompts(args);
-      case 'atom_generate_image':
-        return handleGenerateImage(args);
-      default:
-        return {
-          content: [{ type: 'text', text: `Unknown tool: ${name}` }],
-          isError: true,
-        };
+    try {
+      switch (name) {
+        case 'atom_docs_list':
+          return handleListDocs(args);
+        case 'atom_docs_get':
+          return handleGetDoc(args);
+        case 'atom_docs_search':
+          return handleSearchDocs(args);
+        case 'atom_docs_navigation':
+          return handleGetNavigation();
+        case 'atom_image_prompt':
+          return handleGetImagePrompt(args);
+        case 'atom_image_prompt_list':
+          return handleListImagePrompts(args);
+        case 'atom_generate_image':
+          return handleGenerateImage(args);
+        default:
+          return {
+            content: [{ type: 'text', text: `Unknown tool: ${name}` }],
+            isError: true,
+          };
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return {
+        content: [{ type: 'text', text: `Tool "${name}" failed: ${message}` }],
+        isError: true,
+      };
     }
   });
 

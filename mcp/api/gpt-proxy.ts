@@ -1,8 +1,14 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
-const SERVICE_KEY = process.env.RESTRICTED_CONTENT_SECRET!;
+function requireEnv(name: string): string {
+  const val = process.env[name];
+  if (!val) throw new Error(`Missing required env var: ${name}`);
+  return val;
+}
+
+const SUPABASE_URL = requireEnv('SUPABASE_URL');
+const SUPABASE_ANON_KEY = requireEnv('SUPABASE_ANON_KEY');
+const SERVICE_KEY = requireEnv('RESTRICTED_CONTENT_SECRET');
 
 const supaHeaders = {
   apikey: SUPABASE_ANON_KEY,
@@ -19,7 +25,10 @@ function json(res: ServerResponse, data: unknown, status = 200) {
 
 function lexicalToText(content: any): string {
   if (!content?.root?.children) return '';
-  return content.root.children.map((n: any) => nodeToText(n)).filter(Boolean).join('\n');
+  return content.root.children
+    .map((n: any) => nodeToText(n))
+    .filter(Boolean)
+    .join('\n');
 }
 
 function nodeToText(n: any): string {
@@ -33,13 +42,20 @@ function nodeToText(n: any): string {
 
 function blockToCompact(b: any): string {
   switch (b.blockType) {
-    case 'richText': return lexicalToText(b.content);
-    case 'callout': return `> ${lexicalToText(b.content)}`;
-    case 'colorSwatch': return `${b.label}: ${b.hex}${b.usage ? ` (${b.usage})` : ''}`;
-    case 'dosDonts': return `Do: ${(b.dos ?? []).map((d: any) => d.text).join('; ')}\nDon't: ${(b.donts ?? []).map((d: any) => d.text).join('; ')}`;
-    case 'downloadButton': return `[${b.label}](${b.url})`;
-    case 'divider': return '---';
-    default: return '';
+    case 'richText':
+      return lexicalToText(b.content);
+    case 'callout':
+      return `> ${lexicalToText(b.content)}`;
+    case 'colorSwatch':
+      return `${b.label}: ${b.hex}${b.usage ? ` (${b.usage})` : ''}`;
+    case 'dosDonts':
+      return `Do: ${(b.dos ?? []).map((d: any) => d.text).join('; ')}\nDon't: ${(b.donts ?? []).map((d: any) => d.text).join('; ')}`;
+    case 'downloadButton':
+      return `[${b.label}](${b.url})`;
+    case 'divider':
+      return '---';
+    default:
+      return '';
   }
 }
 
@@ -48,7 +64,11 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
 
   const url = new URL(req.url ?? '/', `https://${req.headers.host}`);
   const path = url.pathname.replace('/gpt', '').replace(/^\//, '') || 'help';
@@ -57,20 +77,25 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
     // GET /gpt/docs — compact list of all docs
     if (path === 'docs' && !url.searchParams.get('slug')) {
       const r = await fetch(`${base}/get-docs`, { headers: supaHeaders });
-      const d = await r.json() as { docs: any[] };
-      return json(res, d.docs.map((doc: any) => ({
-        slug: doc.slug,
-        title: doc.title,
-        description: (doc.description ?? '').slice(0, 120),
-      })));
+      const d = (await r.json()) as { docs: any[] };
+      return json(
+        res,
+        d.docs.map((doc: any) => ({
+          slug: doc.slug,
+          title: doc.title,
+          description: (doc.description ?? '').slice(0, 120),
+        })),
+      );
     }
 
     // GET /gpt/docs?slug=colores — single doc as markdown
     if (path === 'docs' && url.searchParams.get('slug')) {
       const slug = url.searchParams.get('slug')!;
-      const r = await fetch(`${base}/get-docs?slug=${encodeURIComponent(slug)}`, { headers: supaHeaders });
+      const r = await fetch(`${base}/get-docs?slug=${encodeURIComponent(slug)}`, {
+        headers: supaHeaders,
+      });
       if (!r.ok) return json(res, { error: 'not found' }, 404);
-      const d = await r.json() as { doc: any; blocks: any[] };
+      const d = (await r.json()) as { doc: any; blocks: any[] };
       const md = d.blocks.map(blockToCompact).filter(Boolean).join('\n\n');
       return json(res, {
         title: d.doc.title,
@@ -82,8 +107,11 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
     // GET /gpt/nav — compact navigation tree
     if (path === 'nav') {
       const r = await fetch(`${base}/get-navigation`, { headers: supaHeaders });
-      const d = await r.json() as { tree: any[] };
-      function flatten(nodes: any[], cat = ''): { slug: string; title: string; category: string }[] {
+      const d = (await r.json()) as { tree: any[] };
+      function flatten(
+        nodes: any[],
+        cat = '',
+      ): { slug: string; title: string; category: string }[] {
         const out: any[] = [];
         for (const n of nodes) {
           if (n.type === 'folder') out.push(...flatten(n.children ?? [], n.name));
