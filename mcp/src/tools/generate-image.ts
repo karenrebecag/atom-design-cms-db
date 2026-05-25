@@ -1,6 +1,17 @@
+import { z } from 'zod';
+
 function getFalKey() {
   return process.env.FAL_API_KEY;
 }
+
+const SIZE_MAP: Record<string, { width: number; height: number }> = {
+  square_hd: { width: 1024, height: 1024 },
+  landscape_16_9: { width: 1024, height: 576 },
+  portrait_9_16: { width: 576, height: 1024 },
+  portrait_4_5: { width: 1080, height: 1350 },
+};
+
+const VALID_SIZES = Object.keys(SIZE_MAP) as [string, ...string[]];
 
 export const generateImageSchema = {
   type: 'object' as const,
@@ -12,18 +23,17 @@ export const generateImageSchema = {
     },
     size: {
       type: 'string',
-      description: 'Image size: "square_hd" (1:1), "landscape_16_9", "portrait_9_16"',
-      enum: ['square_hd', 'landscape_16_9', 'portrait_9_16'],
+      description:
+        'Image size: "square_hd" (1:1), "landscape_16_9" (16:9), "portrait_9_16" (9:16 stories), "portrait_4_5" (4:5 Instagram/LinkedIn feed)',
+      enum: VALID_SIZES,
     },
   },
   required: ['prompt'],
 };
 
-import { z } from 'zod';
-
 const GenerateImageInput = z.object({
   prompt: z.string().min(1),
-  size: z.enum(['square_hd', 'landscape_16_9', 'portrait_9_16']).default('square_hd'),
+  size: z.enum(VALID_SIZES).default('square_hd'),
 });
 
 export async function handleGenerateImage(args: unknown) {
@@ -41,12 +51,14 @@ export async function handleGenerateImage(args: unknown) {
       content: [
         {
           type: 'text' as const,
-          text: 'getFalKey() not configured. Set it as an environment variable.',
+          text: 'FAL_API_KEY not configured. Set it as an environment variable.',
         },
       ],
       isError: true,
     };
   }
+
+  const dimensions = SIZE_MAP[size];
 
   try {
     const res = await fetch('https://fal.run/fal-ai/flux/dev', {
@@ -57,7 +69,7 @@ export async function handleGenerateImage(args: unknown) {
       },
       body: JSON.stringify({
         prompt,
-        image_size: size,
+        image_size: dimensions,
         num_images: 1,
       }),
     });
