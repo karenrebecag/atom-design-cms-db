@@ -36,7 +36,7 @@ export async function handleGenerateImage(args: unknown) {
   }
 
   try {
-    const res = await fetch('https://fal.run/fal-ai/flux/schnell', {
+    const res = await fetch('https://fal.run/fal-ai/flux-dev', {
       method: 'POST',
       headers: {
         Authorization: `Key ${FAL_API_KEY}`,
