@@ -19,8 +19,12 @@ const LOGO_LIGHT =
   'https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-light.svg';
 
 // Shared CSS foundation for all templates
+// Preview scaling: body is fixed-size (1080x1350 etc) but html wrapper scales it to fit the viewport
 const BASE_CSS = `*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+html{background:#e4e4e7}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;transform-origin:top left;transform:scale(var(--preview-scale,1))}
+@media(max-width:1200px){body{--preview-scale:0.5}}
+@media(max-width:600px){body{--preview-scale:0.33}}
 .hl{color:#FF6600}
 .wa{color:#25D366}
 b,.bold{font-weight:700}
