@@ -5,7 +5,18 @@ export const layoutSchema = {
   properties: {
     template: {
       type: 'string',
-      enum: ['case-study', 'photo-overlay-dark', 'event-hero', 'split-layout', 'editorial-light'],
+      enum: [
+        'case-study',
+        'photo-overlay-dark',
+        'event-hero',
+        'split-layout',
+        'editorial-light',
+        'story-reel',
+        'youtube-thumbnail',
+        'carousel-cover',
+        'carousel-slide',
+        'carousel-cta',
+      ],
       description:
         'Template name. Use atom_layout_list to see all available templates with their placeholders.',
     },
