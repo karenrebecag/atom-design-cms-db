@@ -144,44 +144,89 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
               style: {
                 display: 'flex',
                 flexDirection: 'column',
-                padding: '40px 56px 36px',
+                justifyContent: 'space-between',
+                padding: '36px 56px 32px',
                 flex: 1,
               },
               children: [
-                // Tag pill
-                pill(v.tag_text || 'Caso de exito', v.tag_intent || 'success'),
-                // Client name
+                // Top block: tag + client + kicker + headline + subheadline
                 {
                   type: 'div',
                   props: {
-                    style: {
-                      display: 'flex',
-                      fontSize: 16,
-                      fontWeight: 600,
-                      color: COLORS.body,
-                      marginTop: 16,
-                      marginBottom: 8,
-                    },
-                    children: v.client_name || '',
+                    style: { display: 'flex', flexDirection: 'column' },
+                    children: [
+                      // Tag pill
+                      pill(v.tag_text || 'Caso de exito', v.tag_intent || 'success'),
+                      // Client name
+                      {
+                        type: 'div',
+                        props: {
+                          style: {
+                            display: 'flex',
+                            fontSize: 14,
+                            fontWeight: 500,
+                            color: COLORS.body,
+                            marginTop: 14,
+                          },
+                          children: v.client_name || '',
+                        },
+                      },
+                      // Kicker (optional — the "how" in one line)
+                      v.kicker
+                        ? {
+                            type: 'div',
+                            props: {
+                              style: {
+                                display: 'flex',
+                                fontSize: 14,
+                                fontWeight: 500,
+                                color: COLORS.muted,
+                                marginTop: 4,
+                                letterSpacing: '0.02em',
+                                textTransform: 'uppercase' as const,
+                              },
+                              children: v.kicker,
+                            },
+                          }
+                        : null,
+                      // Headline
+                      {
+                        type: 'div',
+                        props: {
+                          style: {
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            fontSize: 44,
+                            fontWeight: 800,
+                            lineHeight: 1.12,
+                            color: COLORS.heading,
+                            letterSpacing: '-0.03em',
+                            marginTop: 12,
+                          },
+                          children: hl(v.headline || ''),
+                        },
+                      },
+                      // Subheadline (optional — the proof/context)
+                      v.subheadline
+                        ? {
+                            type: 'div',
+                            props: {
+                              style: {
+                                display: 'flex',
+                                fontSize: 18,
+                                fontWeight: 400,
+                                color: COLORS.muted,
+                                marginTop: 14,
+                                lineHeight: 1.5,
+                              },
+                              children: v.subheadline,
+                            },
+                          }
+                        : null,
+                    ].filter(Boolean),
                   },
                 },
-                // Headline
-                {
-                  type: 'div',
-                  props: {
-                    style: {
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      fontSize: 38,
-                      fontWeight: 800,
-                      lineHeight: 1.15,
-                      color: COLORS.heading,
-                      letterSpacing: '-0.025em',
-                    },
-                    children: hl(v.headline || ''),
-                  },
-                },
-                // Logo bar
+                // Logo bar (pushed to bottom by space-between)
                 {
                   type: 'div',
                   props: {
@@ -189,8 +234,6 @@ export const SATORI_TEMPLATES: Record<string, SatoriTemplate> = {
                       display: 'flex',
                       alignItems: 'center',
                       gap: 16,
-                      marginTop: 'auto',
-                      paddingTop: 24,
                     },
                     children: [
                       { type: 'img', props: { src: a.logoLight, height: 28 } },
