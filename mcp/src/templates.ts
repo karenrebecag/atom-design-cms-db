@@ -13,10 +13,7 @@ export interface LayoutTemplate {
   html: string;
 }
 
-const LOGO_DARK =
-  'https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-dark.svg';
-const LOGO_LIGHT =
-  'https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-light.svg';
+import { LOGO_DARK_URL as LOGO_DARK, LOGO_LIGHT_URL as LOGO_LIGHT } from './assets.js';
 
 // Shared CSS foundation for all templates
 // Preview scaling: body is fixed-size (1080x1350 etc) but html wrapper scales it to fit the viewport

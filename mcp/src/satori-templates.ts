@@ -1,29 +1,36 @@
 /**
  * Satori-compatible templates for PNG rendering.
  * Every node with children array MUST have display: 'flex'.
- * Colors/spacing sourced from @atom-uikit/tokens — never hardcoded.
  */
-import * as tokens from '@atom-uikit/tokens';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SatoriNode = any;
 
-// All colors from the DS token package — zero hardcoded values
+/**
+ * Snapshot de `@atom-uikit/tokens@0.1.1` (paleta zinc), el último con el que marca rindió bien.
+ *
+ * WHY congelados y no leídos del DS: el paquete se despublicó de npm y el DS de hoy (0.2.0,
+ * paleta neutral) cambió 7 de estos 12 valores. Seguir al DS recoloreaba todas las piezas sin
+ * que nadie lo decidiera; pasar a seguirlo es una decisión de diseño aparte, no de este fichero.
+ *
+ * `brandFg` es el único que no es 0.1.1: allí era #ffffff sobre #fff4ed (1,1:1, ilegible). Se
+ * usa orange.700, el mismo valor que el gemelo HTML del pill en `templates.ts`.
+ */
 const COLORS = {
-  orange: tokens.brand,
-  violet: tokens.colorViolet600,
+  orange: '#ff6600', // brand
+  violet: '#8023ff', // violet.600
   whatsapp: '#25D366', // WhatsApp brand, not in DS tokens
-  heading: tokens.foreground,
-  body: tokens.foreground,
-  muted: tokens.mutedForeground,
-  dark: tokens.primary,
-  white: tokens.background,
-  border: tokens.border,
-  successBg: tokens.colorEmerald50 ?? '#ECFEF6',
-  successFg: tokens.success,
-  brandBg: tokens.colorOrange50 ?? '#FFF4ED',
-  brandFg: tokens.brandForeground ?? '#A44200',
-  primaryFg: tokens.primaryForeground,
+  heading: '#09090b', // foreground (zinc.950)
+  body: '#09090b', // foreground (zinc.950)
+  muted: '#71717b', // muted-foreground (zinc.500)
+  dark: '#18181b', // primary (zinc.900)
+  white: '#ffffff', // background
+  border: '#e4e4e7', // border (zinc.200)
+  successBg: '#ecfef6', // emerald.50
+  successFg: '#00bd7d', // success (emerald.500)
+  brandBg: '#fff4ed', // orange.50
+  brandFg: '#a44200', // orange.700 — ver arriba
+  primaryFg: '#fafafa', // primary-foreground (zinc.50)
 };
 
 export interface SatoriTemplateInput {
