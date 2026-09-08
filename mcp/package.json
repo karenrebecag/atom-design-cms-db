@@ -18,10 +18,10 @@
     "lint": "eslint src/ api/",
     "format": "prettier --write 'src/**/*.ts' 'api/**/*.ts'",
     "format:check": "prettier --check 'src/**/*.ts' 'api/**/*.ts'",
-    "ci": "pnpm check && pnpm check:api && pnpm lint && pnpm format:check"
+    "smoke": "tsx scripts/smoke-render.ts",
+    "verify": "pnpm check && pnpm check:api && pnpm lint && pnpm format:check"
   },
   "dependencies": {
-    "@atom-uikit/tokens": "^0.1.1",
     "@modelcontextprotocol/sdk": "^1.10.0",
     "@resvg/resvg-js": "^2.6.2",
     "satori": "^0.26.0",

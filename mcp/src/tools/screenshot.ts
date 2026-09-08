@@ -3,11 +3,7 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { getSatoriTemplate, type TemplateAssets } from '../satori-templates.js';
 import { TEMPLATE_SCHEMAS, TEMPLATE_NAMES, type TemplateName } from '../template-schemas.js';
-
-const LOGO_LIGHT =
-  'https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-light.svg';
-const LOGO_DARK =
-  'https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-dark.svg';
+import { LOGO_LIGHT_URL, LOGO_DARK_URL } from '../assets.js';
 
 const ScreenshotInput = z.object({
   template: z.enum(TEMPLATE_NAMES as [string, ...string[]]),
@@ -73,8 +69,8 @@ async function fetchAsDataUri(url: string): Promise<string> {
 
 async function loadAssets(imageUrl?: string): Promise<TemplateAssets> {
   const [logoLight, logoDark, photo] = await Promise.all([
-    fetchAsDataUri(LOGO_LIGHT),
-    fetchAsDataUri(LOGO_DARK),
+    fetchAsDataUri(LOGO_LIGHT_URL),
+    fetchAsDataUri(LOGO_DARK_URL),
     imageUrl ? fetchAsDataUri(imageUrl) : Promise.resolve(undefined),
   ]);
   return { logoLight, logoDark, photo };

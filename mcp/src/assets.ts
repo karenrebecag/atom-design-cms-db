@@ -1,8 +1,28 @@
-## CRITICAL BRAND CONTEXT (always apply)
+/**
+ * Assets de runtime del servidor.
+ *
+ * WHY aquí y no en un CDN: hasta 2026-05 los logos y este contexto se publicaban a npm
+ * (`@atomchat.io/mcp-docs`) y se leían de vuelta por jsDelivr. El paquete se despublicó y
+ * el servidor se quedó sirviendo 404 en silencio: `atom_layout_screenshot` dejó de renderizar
+ * y `atom_docs_list` anexaba un bloque vacío. Nada de Atom se distribuye por npm.
+ *
+ * Los logos viven en R2, que es la única fuente que el doc `claude-context` del CMS autoriza.
+ * Los SVG de `assets/` son copias de referencia idénticas byte a byte a los de R2.
+ */
+
+const R2_BASE = 'https://pub-c8d801a0ff204d758910633021fa302b.r2.dev';
+
+/** Logo blanco, para fondos oscuros. */
+export const LOGO_DARK_URL = `${R2_BASE}/ATOM-horizontal-dark.svg`;
+/** Logo oscuro, para fondos claros. */
+export const LOGO_LIGHT_URL = `${R2_BASE}/ATOM-horizontal-light.svg`;
+
+/** Antes `assets/brand-context.md`. Se anexa a `atom_docs_list` y `atom_docs_get`. */
+export const BRAND_CONTEXT = `## CRITICAL BRAND CONTEXT (always apply)
 
 ### Logo — ONLY authorized source
-- Dark bg (white logo): https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-dark.svg
-- Light bg (dark logo): https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/ATOM-horizontal-light.svg
+- Dark bg (white logo): ${LOGO_DARK_URL}
+- Light bg (dark logo): ${LOGO_LIGHT_URL}
 - Position: ONLY top-left or bottom-right corner
 - NEVER use Google Drive, Logo Pack, or brand-admin.atomchat.io/api/media
 - NEVER reconstruct the logo typographically
@@ -42,3 +62,4 @@
 - Neutral: bg #F4F4F5 text #3F3F46 | Brand: bg #FFF4ED text #A44200
 - AI: bg gradient(136deg, #EDE9FF, #FDE7F4) text #8200DA
 - Disabled: bg #F4F4F5 text #A1A1AA
+`;

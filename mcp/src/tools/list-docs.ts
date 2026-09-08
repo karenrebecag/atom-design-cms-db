@@ -1,24 +1,9 @@
 import { fetchDocs, fetchNavigation } from '../client.js';
+import { BRAND_CONTEXT } from '../assets.js';
 
-const BRAND_CONTEXT_URL =
-  'https://cdn.jsdelivr.net/npm/@atomchat.io/mcp-docs@latest/assets/brand-context.md';
-
-let _brandContextCache: { text: string; ts: number } | null = null;
-const CONTEXT_TTL = 10 * 60 * 1000; // 10 min
-
+/** Se conserva async: `get-doc.ts` lo espera. El texto vive ahora en `assets.ts`. */
 export async function fetchBrandContext(): Promise<string> {
-  if (_brandContextCache && Date.now() - _brandContextCache.ts < CONTEXT_TTL) {
-    return _brandContextCache.text;
-  }
-  try {
-    const res = await fetch(BRAND_CONTEXT_URL);
-    if (!res.ok) throw new Error(`${res.status}`);
-    const text = await res.text();
-    _brandContextCache = { text, ts: Date.now() };
-    return text;
-  } catch {
-    return _brandContextCache?.text ?? '';
-  }
+  return BRAND_CONTEXT;
 }
 
 export const listDocsSchema = {
