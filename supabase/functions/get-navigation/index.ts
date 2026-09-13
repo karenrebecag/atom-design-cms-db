@@ -9,6 +9,13 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
+// Allowlist literal: el nombre de tabla se compone SOLO desde este valor ya
+// validado, nunca del query param crudo (evita inyección de identificador).
+const BASES = {
+  docs: { tabla: "docs", categorias: "categories" },
+  marketing: { tabla: "marketing", categorias: "marketing_categories" },
+} as const;
+
 interface Category {
   id: number;
   title: string;
@@ -41,7 +48,7 @@ interface NavNode {
   children?: NavNode[];
 }
 
-function buildTree(categories: Category[], docs: DocEntry[]): NavNode[] {
+function buildTree(categories: Category[], docs: DocEntry[], prefijoUrl: string): NavNode[] {
   const topCategories = categories
     .filter((c) => !c.parent_category_id)
     .sort((a, b) => a.order - b.order);
@@ -58,7 +65,7 @@ function buildTree(categories: Category[], docs: DocEntry[]): NavNode[] {
         name: d.sidebar_label || d.title,
         slug: d.slug,
         type: "page",
-        url: `/docs/${cat.slug}/${d.slug}`,
+        url: `/${prefijoUrl}/${cat.slug}/${d.slug}`,
         restricted: d.restricted,
       }));
 
@@ -84,6 +91,16 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const url = new URL(req.url);
+  const baseParam = url.searchParams.get("base") ?? "docs";
+  if (!Object.hasOwn(BASES, baseParam)) {
+    return new Response(
+      JSON.stringify({ error: "unknown base" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+  const cfg = BASES[baseParam as keyof typeof BASES];
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_ANON_KEY")!,
@@ -91,11 +108,11 @@ Deno.serve(async (req) => {
 
   const [categoriesRes, docsRes, configRes] = await Promise.all([
     supabase
-      .from("categories")
+      .from(cfg.categorias)
       .select("id, title, slug, description, parent_category_id, icon, order")
       .order("order"),
     supabase
-      .from("docs")
+      .from(cfg.tabla)
       .select("id, title, slug, sidebar_label, category_id, parent_id, order, show_in_sidebar, restricted")
       .eq("_status", "published")
       .order("order"),
@@ -113,7 +130,7 @@ Deno.serve(async (req) => {
     );
   }
 
-  const tree = buildTree(categoriesRes.data, docsRes.data);
+  const tree = buildTree(categoriesRes.data, docsRes.data, baseParam);
 
   return new Response(
     JSON.stringify({
