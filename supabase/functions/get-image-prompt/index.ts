@@ -1,5 +1,17 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+// Payload guarda los casos de uso en una tabla hija; se aplanan a `use_cases: string[]` para que la
+// respuesta siga siendo la que leían los conectores cuando la fuente era `image_prompts`.
+const USE_CASES_EMBED = "prompt_templates_use_cases(value, _order)";
+
+type UseCaseRow = { value: string; _order: number };
+
+function conUseCases<T extends { prompt_templates_use_cases?: UseCaseRow[] }>(row: T) {
+  const { prompt_templates_use_cases: filas = [], ...resto } = row;
+  const use_cases = [...filas].sort((a, b) => a._order - b._order).map((f) => f.value);
+  return { ...resto, use_cases };
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-service-key",
@@ -39,7 +51,7 @@ Deno.serve(async (req) => {
     }
 
     const { data, error } = await supabase
-      .from("image_prompts")
+      .from("prompt_templates")
       .select("template, variables")
       .eq("name", prompt_name)
       .maybeSingle();
@@ -51,13 +63,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    let filled = data.template;
     const vars = data.variables as Record<string, { default?: string }>;
 
-    for (const [key, meta] of Object.entries(vars)) {
-      const value = values[key] ?? meta.default ?? `[${key}]`;
-      filled = filled.replace(new RegExp(`\\[${key}\\]`, "g"), value);
-    }
+    // Una sola pasada con función de reemplazo: con un string, `$&` en un valor se expandía al
+    // placeholder, y un valor que contenía `[setting]` se rellenaba en la vuelta siguiente.
+    const filled = (data.template as string).replace(/\[([A-Za-z0-9_]+)\]/g, (placeholder, key) =>
+      Object.hasOwn(vars, key) ? (values[key] ?? vars[key].default ?? placeholder) : placeholder
+    );
 
     return new Response(
       JSON.stringify({ prompt: filled }),
@@ -74,11 +86,13 @@ Deno.serve(async (req) => {
   // Match by use_case — lightweight lookup, returns name + use_cases only
   if (useCase) {
     const { data, error } = await supabase
-      .from("image_prompts")
-      .select("name, category, use_cases")
-      .contains("use_cases", [useCase]);
+      .from("prompt_templates")
+      .select(`name, category, ${USE_CASES_EMBED}`)
+      .order("id");
 
-    if (error || !data || data.length === 0) {
+    const matches = (data ?? []).map(conUseCases).filter((p) => p.use_cases.includes(useCase));
+
+    if (error || matches.length === 0) {
       return new Response(
         JSON.stringify({ error: `No prompt found for use case "${useCase}"`, available_use_cases: "Use GET without params to list all" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -86,15 +100,15 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ matches: data }),
+      JSON.stringify({ matches }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 
   if (name) {
     const { data, error } = await supabase
-      .from("image_prompts")
-      .select("*")
+      .from("prompt_templates")
+      .select(`id, name, category, template, variables, created_at, updated_at, ${USE_CASES_EMBED}`)
       .eq("name", name)
       .maybeSingle();
 
@@ -106,16 +120,17 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ prompt: data }),
+      JSON.stringify({ prompt: conUseCases(data) }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 
   // LIST: all prompts or filtered by category
   const query = supabase
-    .from("image_prompts")
-    .select("id, name, category, use_cases, created_at")
-    .order("category");
+    .from("prompt_templates")
+    .select(`id, name, category, created_at, ${USE_CASES_EMBED}`)
+    .order("category")
+    .order("id");
 
   if (category) {
     query.eq("category", category);
@@ -131,7 +146,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ prompts: data }),
+    JSON.stringify({ prompts: (data ?? []).map(conUseCases) }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 });
