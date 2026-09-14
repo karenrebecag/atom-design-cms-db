@@ -10,23 +10,39 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
+// Allowlist literal: el nombre de tabla se compone SOLO desde este valor ya
+// validado, nunca del query param crudo (evita inyección de identificador).
+const BASES = {
+  docs: { tabla: "docs", categorias: "categories" },
+  marketing: { tabla: "marketing", categorias: "marketing_categories" },
+} as const;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const url = new URL(req.url);
+  const baseParam = url.searchParams.get("base") ?? "docs";
+  if (!Object.hasOwn(BASES, baseParam)) {
+    return new Response(
+      JSON.stringify({ error: "unknown base" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+  const cfg = BASES[baseParam as keyof typeof BASES];
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  const url = new URL(req.url);
   const slug = url.searchParams.get("slug");
 
   // Single doc by slug
   if (slug) {
     const { data: doc, error } = await supabase
-      .from("docs")
+      .from(cfg.tabla)
       .select("id, title, slug, description, category_id, parent_id, order, sidebar_label, show_in_sidebar, restricted, _status, created_at, updated_at")
       .eq("slug", slug)
       .eq("_status", "published")
@@ -54,19 +70,19 @@ Deno.serve(async (req) => {
 
     // Fetch all block types for this doc
     const blockTables = [
-      { table: "docs_blocks_rich_text", type: "richText" },
-      { table: "docs_blocks_code_block", type: "codeBlock" },
-      { table: "docs_blocks_image_block", type: "imageBlock" },
-      { table: "docs_blocks_callout", type: "callout" },
-      { table: "docs_blocks_steps", type: "steps" },
-      { table: "docs_blocks_card_grid", type: "cardGrid" },
-      { table: "docs_blocks_table", type: "table" },
-      { table: "docs_blocks_divider", type: "divider" },
-      { table: "docs_blocks_color_swatch", type: "colorSwatch" },
-      { table: "docs_blocks_dos_donts", type: "dosDonts" },
-      { table: "docs_blocks_download_button", type: "downloadButton" },
-      { table: "docs_blocks_contact_card", type: "contactCard" },
-      { table: "docs_blocks_nav_link", type: "navLink" },
+      { table: `${cfg.tabla}_blocks_rich_text`, type: "richText" },
+      { table: `${cfg.tabla}_blocks_code_block`, type: "codeBlock" },
+      { table: `${cfg.tabla}_blocks_image_block`, type: "imageBlock" },
+      { table: `${cfg.tabla}_blocks_callout`, type: "callout" },
+      { table: `${cfg.tabla}_blocks_steps`, type: "steps" },
+      { table: `${cfg.tabla}_blocks_card_grid`, type: "cardGrid" },
+      { table: `${cfg.tabla}_blocks_table`, type: "table" },
+      { table: `${cfg.tabla}_blocks_divider`, type: "divider" },
+      { table: `${cfg.tabla}_blocks_color_swatch`, type: "colorSwatch" },
+      { table: `${cfg.tabla}_blocks_dos_donts`, type: "dosDonts" },
+      { table: `${cfg.tabla}_blocks_download_button`, type: "downloadButton" },
+      { table: `${cfg.tabla}_blocks_contact_card`, type: "contactCard" },
+      { table: `${cfg.tabla}_blocks_nav_link`, type: "navLink" },
     ];
 
     const blocks: Record<string, unknown>[] = [];
@@ -123,7 +139,7 @@ Deno.serve(async (req) => {
     for (const block of blocks) {
       if (block.blockType === "steps") {
         const { data: stepsData } = await supabase
-          .from("docs_blocks_steps_steps")
+          .from(`${cfg.tabla}_blocks_steps_steps`)
           .select("*")
           .eq("_parent_id", block.id)
           .order("_order");
@@ -135,8 +151,8 @@ Deno.serve(async (req) => {
     for (const block of blocks) {
       if (block.blockType === "dosDonts") {
         const [dosRes, dontsRes] = await Promise.all([
-          supabase.from("docs_blocks_dos_donts_dos").select("*").eq("_parent_id", block.id).order("_order"),
-          supabase.from("docs_blocks_dos_donts_donts").select("*").eq("_parent_id", block.id).order("_order"),
+          supabase.from(`${cfg.tabla}_blocks_dos_donts_dos`).select("*").eq("_parent_id", block.id).order("_order"),
+          supabase.from(`${cfg.tabla}_blocks_dos_donts_donts`).select("*").eq("_parent_id", block.id).order("_order"),
         ]);
         block.dos = dosRes.data ?? [];
         block.donts = dontsRes.data ?? [];
@@ -147,8 +163,8 @@ Deno.serve(async (req) => {
     for (const block of blocks) {
       if (block.blockType === "table") {
         const [headersRes, rowsRes] = await Promise.all([
-          supabase.from("docs_blocks_table_headers").select("id, label, _order").eq("_parent_id", block.id).order("_order"),
-          supabase.from("docs_blocks_table_rows").select("id, _order").eq("_parent_id", block.id).order("_order"),
+          supabase.from(`${cfg.tabla}_blocks_table_headers`).select("id, label, _order").eq("_parent_id", block.id).order("_order"),
+          supabase.from(`${cfg.tabla}_blocks_table_rows`).select("id, _order").eq("_parent_id", block.id).order("_order"),
         ]);
         block.headers = headersRes.data ?? [];
 
@@ -156,7 +172,7 @@ Deno.serve(async (req) => {
         if (rows.length > 0) {
           const rowIds = rows.map((r: Record<string, unknown>) => r.id as string);
           const { data: cells } = await supabase
-            .from("docs_blocks_table_rows_cells")
+            .from(`${cfg.tabla}_blocks_table_rows_cells`)
             .select("id, value, _order, _parent_id")
             .in("_parent_id", rowIds)
             .order("_order");
@@ -188,7 +204,7 @@ Deno.serve(async (req) => {
 
   // List all published docs
   const { data: docs, error } = await supabase
-    .from("docs")
+    .from(cfg.tabla)
     .select("id, title, slug, description, category_id, parent_id, order, sidebar_label, show_in_sidebar, restricted, _status")
     .eq("_status", "published")
     .order("order");
