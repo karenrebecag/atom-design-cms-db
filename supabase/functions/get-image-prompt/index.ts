@@ -63,13 +63,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    let filled = data.template;
     const vars = data.variables as Record<string, { default?: string }>;
 
-    for (const [key, meta] of Object.entries(vars)) {
-      const value = values[key] ?? meta.default ?? `[${key}]`;
-      filled = filled.replace(new RegExp(`\\[${key}\\]`, "g"), value);
-    }
+    // Una sola pasada con función de reemplazo: con un string, `$&` en un valor se expandía al
+    // placeholder, y un valor que contenía `[setting]` se rellenaba en la vuelta siguiente.
+    const filled = (data.template as string).replace(/\[([A-Za-z0-9_]+)\]/g, (placeholder, key) =>
+      Object.hasOwn(vars, key) ? (values[key] ?? vars[key].default ?? placeholder) : placeholder
+    );
 
     return new Response(
       JSON.stringify({ prompt: filled }),
