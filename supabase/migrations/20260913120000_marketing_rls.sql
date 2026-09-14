@@ -20,69 +20,86 @@
 -- ============================================================
 -- H7 — docs_blocks_*: 13 tablas de primer nivel + 7 anidadas.
 -- Idempotente: DROP POLICY IF EXISTS antes de cada CREATE.
+-- Producción no tiene `anon_read_*`: cada tabla trae `read_only`
+-- (anon, USING true), leído de pg_policies el 2026-09-14. Las policies
+-- permisivas se combinan con OR, así que sin borrar `read_only` la nueva
+-- condición no restringiría nada y H7 seguiría abierto.
 -- ============================================================
 
 -- Primer nivel: _parent_id apunta directo a docs.id.
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_rich_text;
 DROP POLICY IF EXISTS "anon_read_rich_text" ON public.docs_blocks_rich_text;
 CREATE POLICY "anon_read_rich_text"
   ON public.docs_blocks_rich_text FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_code_block;
 DROP POLICY IF EXISTS "anon_read_code_block" ON public.docs_blocks_code_block;
 CREATE POLICY "anon_read_code_block"
   ON public.docs_blocks_code_block FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_image_block;
 DROP POLICY IF EXISTS "anon_read_image_block" ON public.docs_blocks_image_block;
 CREATE POLICY "anon_read_image_block"
   ON public.docs_blocks_image_block FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_callout;
 DROP POLICY IF EXISTS "anon_read_callout" ON public.docs_blocks_callout;
 CREATE POLICY "anon_read_callout"
   ON public.docs_blocks_callout FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_steps;
 DROP POLICY IF EXISTS "anon_read_steps" ON public.docs_blocks_steps;
 CREATE POLICY "anon_read_steps"
   ON public.docs_blocks_steps FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_card_grid;
 DROP POLICY IF EXISTS "anon_read_card_grid" ON public.docs_blocks_card_grid;
 CREATE POLICY "anon_read_card_grid"
   ON public.docs_blocks_card_grid FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_table;
 DROP POLICY IF EXISTS "anon_read_table" ON public.docs_blocks_table;
 CREATE POLICY "anon_read_table"
   ON public.docs_blocks_table FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_divider;
 DROP POLICY IF EXISTS "anon_read_divider" ON public.docs_blocks_divider;
 CREATE POLICY "anon_read_divider"
   ON public.docs_blocks_divider FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_color_swatch;
 DROP POLICY IF EXISTS "anon_read_color_swatch" ON public.docs_blocks_color_swatch;
 CREATE POLICY "anon_read_color_swatch"
   ON public.docs_blocks_color_swatch FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_dos_donts;
 DROP POLICY IF EXISTS "anon_read_dos_donts" ON public.docs_blocks_dos_donts;
 CREATE POLICY "anon_read_dos_donts"
   ON public.docs_blocks_dos_donts FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_download_button;
 DROP POLICY IF EXISTS "anon_read_download_button" ON public.docs_blocks_download_button;
 CREATE POLICY "anon_read_download_button"
   ON public.docs_blocks_download_button FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_contact_card;
 DROP POLICY IF EXISTS "anon_read_contact_card" ON public.docs_blocks_contact_card;
 CREATE POLICY "anon_read_contact_card"
   ON public.docs_blocks_contact_card FOR SELECT TO anon, authenticated
   USING (EXISTS (SELECT 1 FROM public.docs d WHERE d.id = _parent_id AND d._status = 'published' AND d.restricted IS NOT TRUE));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_nav_link;
 DROP POLICY IF EXISTS "anon_read_nav_link" ON public.docs_blocks_nav_link;
 CREATE POLICY "anon_read_nav_link"
   ON public.docs_blocks_nav_link FOR SELECT TO anon, authenticated
@@ -92,6 +109,7 @@ CREATE POLICY "anon_read_nav_link"
 -- condición llega hasta el doc a través del bloque padre, igual
 -- que hoy, pero ahora también exige `published` y `restricted IS NOT TRUE`
 -- (hoy ninguna de las anidadas comprobaba el doc en absoluto).
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_steps_steps;
 DROP POLICY IF EXISTS "anon_read_steps_steps" ON public.docs_blocks_steps_steps;
 CREATE POLICY "anon_read_steps_steps"
   ON public.docs_blocks_steps_steps FOR SELECT TO anon, authenticated
@@ -102,6 +120,7 @@ CREATE POLICY "anon_read_steps_steps"
       AND d._status = 'published' AND d.restricted IS NOT TRUE
   ));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_card_grid_cards;
 DROP POLICY IF EXISTS "anon_read_card_grid_cards" ON public.docs_blocks_card_grid_cards;
 CREATE POLICY "anon_read_card_grid_cards"
   ON public.docs_blocks_card_grid_cards FOR SELECT TO anon, authenticated
@@ -112,6 +131,7 @@ CREATE POLICY "anon_read_card_grid_cards"
       AND d._status = 'published' AND d.restricted IS NOT TRUE
   ));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_table_headers;
 DROP POLICY IF EXISTS "anon_read_table_headers" ON public.docs_blocks_table_headers;
 CREATE POLICY "anon_read_table_headers"
   ON public.docs_blocks_table_headers FOR SELECT TO anon, authenticated
@@ -122,6 +142,7 @@ CREATE POLICY "anon_read_table_headers"
       AND d._status = 'published' AND d.restricted IS NOT TRUE
   ));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_table_rows;
 DROP POLICY IF EXISTS "anon_read_table_rows" ON public.docs_blocks_table_rows;
 CREATE POLICY "anon_read_table_rows"
   ON public.docs_blocks_table_rows FOR SELECT TO anon, authenticated
@@ -134,6 +155,7 @@ CREATE POLICY "anon_read_table_rows"
 
 -- table_rows_cells cuelga de table_rows, que a su vez cuelga de
 -- table: tres saltos para llegar al doc.
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_table_rows_cells;
 DROP POLICY IF EXISTS "anon_read_table_rows_cells" ON public.docs_blocks_table_rows_cells;
 CREATE POLICY "anon_read_table_rows_cells"
   ON public.docs_blocks_table_rows_cells FOR SELECT TO anon, authenticated
@@ -145,6 +167,7 @@ CREATE POLICY "anon_read_table_rows_cells"
       AND d._status = 'published' AND d.restricted IS NOT TRUE
   ));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_dos_donts_dos;
 DROP POLICY IF EXISTS "anon_read_dos_donts_dos" ON public.docs_blocks_dos_donts_dos;
 CREATE POLICY "anon_read_dos_donts_dos"
   ON public.docs_blocks_dos_donts_dos FOR SELECT TO anon, authenticated
@@ -155,6 +178,7 @@ CREATE POLICY "anon_read_dos_donts_dos"
       AND d._status = 'published' AND d.restricted IS NOT TRUE
   ));
 
+DROP POLICY IF EXISTS "read_only" ON public.docs_blocks_dos_donts_donts;
 DROP POLICY IF EXISTS "anon_read_dos_donts_donts" ON public.docs_blocks_dos_donts_donts;
 CREATE POLICY "anon_read_dos_donts_donts"
   ON public.docs_blocks_dos_donts_donts FOR SELECT TO anon, authenticated
