@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
       (b) => (b.blockType === "imageBlock" || b.blockType === "contactCard") && b.image_id,
     );
     if (imageBlocks.length > 0) {
-      const cmsUrl = Deno.env.get("CMS_URL") ?? "https://brand-admin.atomchat.io";
+      const cmsUrl = Deno.env.get("CMS_URL") ?? "https://knowledgeadmin.atomchat.io";
       const imageIds = imageBlocks.map((b) => b.image_id as string);
       const idsParam = imageIds.join(",");
 
