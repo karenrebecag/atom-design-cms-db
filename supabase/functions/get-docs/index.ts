@@ -15,6 +15,8 @@ const corsHeaders = {
 const BASES = {
   docs: { tabla: "docs", categorias: "categories" },
   marketing: { tabla: "marketing", categorias: "marketing_categories" },
+  webmarketing: { tabla: "webmarketing", categorias: "webmarketing_categories" },
+  productmarketing: { tabla: "productmarketing", categorias: "productmarketing_categories" },
 } as const;
 
 Deno.serve(async (req) => {
